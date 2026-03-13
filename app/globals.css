@@ -1,0 +1,202 @@
+@import "tailwindcss";
+
+/* ===== COLOR TOKENS — DARK (default) ===== */
+:root {
+  --primary: #1e3a5f;
+  --primary-foreground: #ffffff;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #1e3a5f;
+  --accent: #f97316;
+  --accent-foreground: #ffffff;
+  --background: #060d1f;
+  --foreground: #e8eaf0;
+  --muted: #0f1f3d;
+  --muted-foreground: #93aec8;
+  --border: #1e3a5f40;
+  --input: #1e3a5f;
+  --ring: #f97316;
+  --radius: 0.5rem;
+  --popover: #0f1f3d;
+  --popover-foreground: #e8eaf0;
+  --card: #0f1f3d;
+  --card-foreground: #e8eaf0;
+  /* bauhaus */
+  --bauhaus-card-bg: #0f1f3d;
+  --bauhaus-card-separator: #1e3a5f;
+  --bauhaus-card-accent: #f97316;
+  --bauhaus-card-radius: 2em;
+  --bauhaus-card-border-width: 2px;
+  --bauhaus-card-inscription-top: #93aec8;
+  --bauhaus-card-inscription-main: #f0f0f1;
+  --bauhaus-card-inscription-sub: #7a90a8;
+  --bauhaus-card-inscription-progress-label: #b4c7e7;
+  --bauhaus-card-inscription-progress-value: #e7e7f7;
+  --bauhaus-card-progress-bar-bg: #1e3a5f;
+  --bauhaus-chronicle-bg: #1e3a5f;
+  --bauhaus-chronicle-fg: #fff;
+  --bauhaus-chronicle-hover-fg: #fff;
+}
+
+/* ===== LIGHT MODE TOKEN OVERRIDES ===== */
+html.light {
+  --background: #f0f6ff;
+  --foreground: #0f172a;
+  --muted: #dde8f8;
+  --muted-foreground: #475569;
+  --border: #bfdbfe80;
+  --card: #e8f0fb;
+  --card-foreground: #0f172a;
+  --popover: #e8f0fb;
+  --popover-foreground: #0f172a;
+  --primary: #1e3a5f;
+  --bauhaus-card-bg: #dde8f8;
+  --bauhaus-card-separator: #93c5fd;
+  --bauhaus-card-inscription-top: #475569;
+  --bauhaus-card-inscription-main: #0f172a;
+  --bauhaus-card-inscription-sub: #475569;
+  --bauhaus-card-inscription-progress-label: #334155;
+  --bauhaus-card-inscription-progress-value: #0f172a;
+  --bauhaus-card-progress-bar-bg: #bfdbfe;
+  --bauhaus-chronicle-bg: #dde8f8;
+  --bauhaus-chronicle-fg: #0f172a;
+  --bauhaus-chronicle-hover-fg: #0f172a;
+}
+
+/* Light mode: override all the hardcoded Tailwind dark colors */
+html.light body,
+html.light [class*="bg-\[#060d1f\]"],
+html.light [class*="bg-\[#0a1628\]"],
+html.light [class*="bg-\[#0f1f3d\]"] {
+  background-color: var(--background) !important;
+}
+
+html.light [class*="bg-blue-950"],
+html.light [class*="bg-\[#0a1628\]"] {
+  background-color: var(--muted) !important;
+}
+
+/* Text overrides for light mode */
+html.light [class*="text-white"] {
+  color: var(--foreground) !important;
+}
+
+html.light [class*="text-blue-300"],
+html.light [class*="text-blue-200"],
+html.light [class*="text-blue-400"] {
+  color: #475569 !important;
+}
+
+html.light [class*="text-blue-500"] {
+  color: #64748b !important;
+}
+
+/* Border overrides */
+html.light [class*="border-blue-900"],
+html.light [class*="border-blue-800"] {
+  border-color: #93c5fd40 !important;
+}
+
+/* Card / section backgrounds in light mode */
+html.light [class*="bg-blue-950\/20"],
+html.light [class*="bg-blue-950\/40"] {
+  background-color: #e8f0fb !important;
+}
+
+html.light [class*="from-\[#060d1f\]"],
+html.light [class*="via-\[#0a1628\]"],
+html.light [class*="to-\[#0f1f3d\]"],
+html.light [class*="from-\[#0a1628\]"],
+html.light [class*="to-\[#1e3a5f\]"] {
+  background: var(--background) !important;
+}
+
+/* Image overlays — transparent in light mode so photos are visible */
+html.light .img-overlay {
+  background: transparent !important;
+}
+
+/* Hero background overlay — very light in light mode */
+html.light .hero-overlay {
+  background: linear-gradient(to bottom,
+      rgba(255, 255, 255, 0.35) 0%,
+      rgba(230, 240, 255, 0.25) 50%,
+      rgba(255, 255, 255, 0.40) 100%) !important;
+}
+
+/* CRM: always show scrollbar track space to prevent layout shift */
+.crm-wrapper {
+  overflow-y: unset;
+  /* Scrollbar is handled by html element above */
+}
+
+/* Section overlays (dark bg behind section bg images) — never override in light mode */
+.section-overlay {
+  opacity: 1 !important;
+}
+
+/* ===== TAILWIND V4 THEME ===== */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ===== GLOBAL BASE ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-y: scroll;
+  /* Always show scrollbar gutter — prevents layout shift on nav */
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e3a5f;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #f97316;
+}
+
+/* ===== SELECTION ===== */
+::selection {
+  background: #f97316;
+  color: white;
+}
