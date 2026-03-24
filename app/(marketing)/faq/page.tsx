@@ -86,7 +86,7 @@ export default function FaqPage() {
           description: "Our transport specialists are available to help you Mon–Fri 8am–8pm ET",
           buttonText: "Contact Support",
           onContact: () => {
-            window.location.href = "/get-quote";
+            window.location.href = "/contact";
           },
         }}
       />

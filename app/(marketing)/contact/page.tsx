@@ -2,20 +2,33 @@
 
 import { useState } from "react";
 import { Phone, Mail, MapPin, Clock, MessageCircle, Send, CheckCircle } from "lucide-react";
+import { EmailLink } from "@/components/EmailLink";
 import Image from "next/image";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({ name: "", phone: "", email: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Build WhatsApp message from form data
-    const msg = `Hi, I'm ${formData.name}.\n\nPhone: ${formData.phone}\nEmail: ${formData.email}\n\nMessage: ${formData.message}`;
-    const waUrl = `https://wa.me/923059846727?text=${encodeURIComponent(msg)}`;
-    window.open(waUrl, "_blank");
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 4000);
+    setSubmitting(true);
+    setError("");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (!res.ok) throw new Error("Failed to send");
+      setSubmitted(true);
+      setFormData({ name: "", phone: "", email: "", message: "" });
+      setTimeout(() => setSubmitted(false), 5000);
+    } catch {
+      setError("Something went wrong. Please try calling or emailing us directly.");
+    }
+    setSubmitting(false);
   };
 
   return (
@@ -73,9 +86,7 @@ export default function ContactPage() {
               </div>
               <div>
                 <p className="text-xs text-blue-400 uppercase tracking-wider mb-1">Email</p>
-                <a href="mailto:info@wessolutions.com" className="text-base font-semibold text-white hover:text-orange-400 transition-colors">
-                  info@wessolutions.com
-                </a>
+                <EmailLink className="text-base font-semibold text-white hover:text-orange-400 transition-colors" />
                 <p className="text-sm text-blue-300 mt-0.5">We respond within a few hours</p>
               </div>
             </div>
@@ -104,12 +115,20 @@ export default function ContactPage() {
 
           {/* Contact Form */}
           <div className="bg-[#0a1628] border border-blue-800/30 rounded-2xl p-8">
-            <h2 className="text-xl font-bold text-white mb-6">Send Us a Message</h2>
+            <h2 className="text-xl font-bold text-white mb-2">Send Us a Message</h2>
+            <p className="text-blue-400 text-sm mb-6">Fill in your details and our team will get back to you shortly.</p>
+
             {submitted && (
               <div className="flex items-center gap-2 p-3 mb-4 rounded-lg bg-green-900/20 border border-green-700/40 text-green-400 text-sm">
-                <CheckCircle className="w-4 h-4" /> Opening WhatsApp with your message...
+                <CheckCircle className="w-4 h-4" /> Inquiry received! Our team will contact you soon.
               </div>
             )}
+            {error && (
+              <div className="p-3 mb-4 rounded-lg bg-red-900/20 border border-red-800/40 text-red-400 text-sm">
+                {error}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-blue-200 mb-1.5">Your Name <span className="text-orange-400">*</span></label>
@@ -155,26 +174,35 @@ export default function ContactPage() {
                   className="w-full rounded-lg border border-blue-800/50 bg-blue-950/40 px-3 py-2.5 text-white text-sm placeholder:text-blue-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all resize-none"
                 />
               </div>
+
+              {/* PRIMARY: Submit Inquiry button — saves to DB */}
               <button
                 type="submit"
-                className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition-colors"
+                disabled={submitting}
+                className="w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition-colors"
               >
-                <MessageCircle className="w-4 h-4" />
-                Send via WhatsApp
+                {submitting ? (
+                  <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Sending...</span>
+                ) : (
+                  <><Send className="w-4 h-4" /> Send Inquiry</>
+                )}
               </button>
+
+              {/* Quick contact row */}
               <div className="flex gap-3">
                 <a
                   href="tel:+923059846727"
-                  className="flex-1 flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition-colors text-sm"
+                  className="flex-1 flex items-center justify-center gap-2 bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg transition-colors text-sm"
                 >
                   <Phone className="w-4 h-4" /> Call Us
                 </a>
-                <a
-                  href="mailto:info@wessolutions.com"
-                  className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors text-sm"
+                <EmailLink
+                  wrapperClassName="flex-1"
+                  className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors text-sm"
+                  showIcon
                 >
-                  <Send className="w-4 h-4" /> Email Us
-                </a>
+                  Email Us
+                </EmailLink>
               </div>
             </form>
           </div>

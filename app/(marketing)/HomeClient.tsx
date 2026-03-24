@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { AnimatedHero } from "@/components/ui/animated-hero";
 import { FeaturesSectionWithHoverEffects } from "@/components/ui/feature-section-with-hover-effects";
 import { Globe } from "@/components/ui/globe";
@@ -20,25 +21,15 @@ import {
   MapPin,
 } from "lucide-react";
 
-const reviews = [
-  {
-    name: "Michael T.",
-    location: "New York → California",
-    rating: 5,
-    text: "Absolutely seamless experience. My car arrived 2 days early and in perfect condition. The broker kept me updated throughout the entire journey.",
-  },
-  {
-    name: "Sarah K.",
-    location: "Texas → Florida",
-    rating: 5,
-    text: "Quoted 3 other companies and AutoTransportPro beat them all on price AND delivery speed. Will definitely use again for my next move.",
-  },
-  {
-    name: "James R.",
-    location: "Chicago → Arizona",
-    rating: 5,
-    text: "Had a classic 1967 Mustang to ship. They arranged enclosed transport, and the car arrived without a scratch. Worth every penny.",
-  },
+interface Review { name: string; location?: string; author_name?: string; rating: number; text?: string; content?: string; }
+
+const HARDCODED_REVIEWS: Review[] = [
+  { name: "Michael T.", location: "New York → California", rating: 5, text: "Absolutely seamless experience. My car arrived 2 days early and in perfect condition. The broker kept me updated throughout the entire journey." },
+  { name: "Sarah K.", location: "Texas → Florida", rating: 5, text: "Quoted 3 other companies and AutoTransportPro beat them all on price AND delivery speed. Will definitely use again for my next move." },
+  { name: "James R.", location: "Chicago → Arizona", rating: 5, text: "Had a classic 1967 Mustang to ship. They arranged enclosed transport, and the car arrived without a scratch. Worth every penny." },
+  { name: "Ahmed K.", rating: 5, text: "Excellent service! My car was delivered on time and in perfect condition." },
+  { name: "Emily C.", rating: 5, text: "Used their expedited service for a last-minute move and they delivered! My Toyota arrived two days early." },
+  { name: "Fatima Z.", rating: 4, text: "Very responsive customer support. Had a question about insurance coverage and the team helped me understand everything clearly." },
 ];
 
 const stats = [
@@ -123,6 +114,23 @@ const ctaWords = [
 ];
 
 export default function HomeClient() {
+  const [allReviews, setAllReviews] = useState<Review[]>(HARDCODED_REVIEWS);
+
+  useEffect(() => {
+    fetch("/api/reviews")
+      .then((r) => r.json())
+      .then(({ reviews: dbReviews }) => {
+        if (dbReviews?.length) {
+          const mapped = dbReviews.map((r: any) => ({ name: r.author_name, rating: r.rating, text: r.content }));
+          setAllReviews([...mapped, ...HARDCODED_REVIEWS]);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Duplicate for seamless loop
+  const marqueeItems = [...allReviews, ...allReviews];
+
   return (
     <div className="min-h-screen">
       {/* ===== HERO ===== */}
@@ -295,42 +303,55 @@ export default function HomeClient() {
         </div>
       </section>
 
-      {/* ===== REVIEWS ===== */}
-      <section className="py-24 px-6 bg-[#060d1f]">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            className="text-center mb-16"
-          >
+      {/* ===== CUSTOMER STORIES (infinite marquee scroll) ===== */}
+      <section className="py-24 px-0 bg-[#060d1f] overflow-hidden">
+        <div className="max-w-6xl mx-auto px-6 mb-12">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} className="text-center">
             <span className="text-orange-400 text-sm font-semibold uppercase tracking-widest">Customer Stories</span>
             <h2 className="text-4xl font-bold text-white mt-3">What Our Customers Say</h2>
           </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {reviews.map((review, i) => (
-              <motion.div
-                key={review.name}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.15 }}
-                className="p-6 rounded-2xl border border-blue-800/30 bg-blue-950/20 hover:border-orange-500/20 transition-all duration-300"
+        </div>
+        {/* Marquee container */}
+        <div className="relative">
+          {/* Left & right fade masks */}
+          <div className="absolute left-0 top-0 bottom-0 w-24 z-10 bg-gradient-to-r from-[#060d1f] to-transparent pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-24 z-10 bg-gradient-to-l from-[#060d1f] to-transparent pointer-events-none" />
+          <div
+            className="flex gap-6"
+            style={{
+              animation: "marquee 40s linear infinite",
+              width: "max-content",
+            }}
+          >
+            {marqueeItems.map((review, i) => (
+              <div
+                key={i}
+                className="w-80 flex-shrink-0 p-6 rounded-2xl border border-blue-800/30 bg-blue-950/20 hover:border-orange-500/30 transition-all"
               >
-                <div className="flex mb-4">
+                <div className="flex mb-3">
                   {[...Array(review.rating)].map((_, j) => (
                     <Star key={j} className="w-4 h-4 text-orange-400 fill-orange-400" />
                   ))}
                 </div>
-                <p className="text-blue-200 text-sm leading-relaxed mb-4">&quot;{review.text}&quot;</p>
+                <p className="text-blue-200 text-sm leading-relaxed mb-4">&quot;{review.text || review.content}&quot;</p>
                 <div>
-                  <div className="text-white font-semibold text-sm">{review.name}</div>
-                  <div className="text-blue-400 text-xs mt-0.5 flex items-center gap-1">
-                    <MapPin className="w-3 h-3" /> {review.location}
-                  </div>
+                  <div className="text-white font-semibold text-sm">{review.name || review.author_name}</div>
+                  {review.location && (
+                    <div className="text-blue-400 text-xs mt-0.5 flex items-center gap-1">
+                      <MapPin className="w-3 h-3" /> {review.location}
+                    </div>
+                  )}
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
+        <style>{`
+          @keyframes marquee {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+        `}</style>
       </section>
 
       {/* ===== CTA ===== */}

@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-// Protect all CRM routes — both /crm/* and the legacy /dashboard /leads /login paths
+// Protect all CRM routes — /crm/*
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -14,7 +14,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Allow login page through
-  if (pathname === "/crm/login" || pathname === "/login") {
+  if (pathname === "/crm/login") {
     return NextResponse.next();
   }
 
@@ -30,5 +30,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/crm/:path*", "/dashboard/:path*", "/leads/:path*", "/login"],
+  matcher: ["/crm/:path*", "/dashboard/:path*", "/leads/:path*"],
 };

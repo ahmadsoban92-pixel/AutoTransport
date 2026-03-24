@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,23 @@ export default function CRMLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // ── Chrome Autofill Blocker ──────────────────────────────────────────────
+  // Chrome ignores autoComplete="off" and fills fields before React can stop it.
+  // The only reliable block: mount inputs as readOnly, remove readOnly after paint.
+  // Chrome never autofills readOnly fields.
+  const [inputReady, setInputReady] = useState(false);
+  useEffect(() => {
+    // Use requestAnimationFrame to fire AFTER the first browser paint
+    // This ensures Chrome has no opportunity to autofill before we un-readOnly
+    const id = requestAnimationFrame(() => {
+      setEmail("");
+      setPassword("");
+      setInputReady(true);
+    });
+    return () => cancelAnimationFrame(id);
+  }, []);
+  // ────────────────────────────────────────────────────────────────────────
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -26,8 +43,6 @@ export default function CRMLoginPage() {
       setError(error.message);
       setIsLoading(false);
     } else {
-      // Set a cookie so the middleware can verify auth on the server side.
-      // Supabase v2 uses localStorage by default, so we bridge with a manual cookie.
       if (data.session?.access_token) {
         document.cookie = `crm-auth=${data.session.access_token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
       }
@@ -53,13 +68,15 @@ export default function CRMLoginPage() {
 
         <div className="bg-[#0a1628] border border-blue-800/30 rounded-2xl p-8">
           <h2 className="text-lg font-semibold text-white mb-6">Sign in to your account</h2>
-          <form onSubmit={handleLogin} className="space-y-4">
+          {/* autoComplete="off" on form + readOnly on fields until inputReady */}
+          <form onSubmit={handleLogin} className="space-y-4" autoComplete="off">
             <div>
               <label className="block text-sm font-medium text-blue-200 mb-1.5">Email Address</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                readOnly={!inputReady}
                 required
                 autoComplete="off"
                 placeholder="broker@autotransportpro.com"
@@ -73,6 +90,7 @@ export default function CRMLoginPage() {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  readOnly={!inputReady}
                   required
                   autoComplete="new-password"
                   placeholder="••••••••"
@@ -96,7 +114,7 @@ export default function CRMLoginPage() {
 
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !inputReady}
               className="w-full h-11 bg-orange-500 hover:bg-orange-600 text-white border-0 font-semibold"
             >
               {isLoading ? (

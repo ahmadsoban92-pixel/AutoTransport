@@ -61,10 +61,9 @@ function AnimatedHero() {
               </span>
             </h1>
 
-            <p className="text-lg md:text-xl leading-relaxed tracking-tight text-blue-200 max-w-2xl text-center">
+            <p className="text-lg md:text-xl leading-relaxed tracking-tight text-white max-w-2xl text-center drop-shadow-sm">
               We connect you with the nation&apos;s top auto carriers to ship your
-              vehicle safely, on time, and at the best price. Get a free quote in
-              under 60 seconds.
+              vehicle safely, on time, and at the best price. Get a Quote in less than 2 minutes.
             </p>
           </div>
           <div className="flex flex-row gap-3 flex-wrap justify-center">

@@ -33,7 +33,7 @@ export default function ThankYouPage() {
             Quote Request <span className="text-green-400">Received!</span>
           </h1>
           <p className="text-blue-300 text-lg mb-8 leading-relaxed">
-            Thank you for choosing AutoTransportPro. Your dedicated broker will review your request and contact you within <strong className="text-white">30 minutes</strong> with a personalized quote.
+            Thank you for choosing AutoTransportPro. Your dedicated broker will review your request and contact you within <strong className="text-white">2–30 minutes</strong> with a personalized quote.
           </p>
         </motion.div>
 
@@ -49,7 +49,7 @@ export default function ThankYouPage() {
             {[
               {
                 icon: <Clock className="w-5 h-5 text-orange-400" />,
-                title: "Within 30 minutes",
+                title: "Within 2–30 minutes",
                 desc: "A dedicated broker reviews your request and prepares your personalized quote.",
               },
               {
@@ -87,7 +87,7 @@ export default function ThankYouPage() {
               Back to Home
             </Button>
           </Link>
-          <a href="tel:+18005551234">
+          <a href="tel:+923059846727">
             <Button className="bg-orange-500 hover:bg-orange-600 text-white border-0">
               <Phone className="mr-2 w-4 h-4" /> Call Us Now
             </Button>
@@ -101,10 +101,10 @@ export default function ThankYouPage() {
           className="text-blue-500 text-xs mt-6"
         >
           Can&apos;t wait? Call us directly at{" "}
-          <a href="tel:+18005551234" className="text-orange-400 hover:underline">
-            1-800-555-1234
+          <a href="tel:+923059846727" className="text-orange-400 hover:underline">
+            +92 305 984 6727
           </a>{" "}
-          — available Mon–Fri 8am–8pm ET
+          — available Mon–Fri 8am–8pm
         </motion.p>
       </motion.div>
     </div>

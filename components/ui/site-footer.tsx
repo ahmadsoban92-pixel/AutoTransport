@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Monitor, Moon, Sun, Truck, Phone, Mail, MapPin, MessageCircle } from "lucide-react";
+import { Monitor, Moon, Sun, Phone, Mail, MapPin, MessageCircle, Truck } from "lucide-react";
+import { EmailLink } from "@/components/EmailLink";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 
@@ -56,7 +57,7 @@ export function SiteFooter() {
               </div>
               <div className="flex items-center gap-2 text-sm text-blue-300">
                 <Mail className="w-4 h-4 text-orange-400" />
-                <a href="mailto:info@wessolutions.com" className="hover:text-white transition-colors">info@wessolutions.com</a>
+                <EmailLink className="hover:text-white transition-colors text-blue-300 text-sm" />
               </div>
               <div className="flex items-center gap-2 text-sm text-blue-300">
                 <MapPin className="w-4 h-4 text-orange-400" />

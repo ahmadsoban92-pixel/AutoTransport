@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 const milestones = [
-  { year: "2010", event: "Founded in Dallas, TX with a mission to simplify auto transport" },
+  { year: "2010", event: "Founded with a mission to make auto transport simple, transparent, and stress-free for car owners across America" },
   { year: "2013", event: "Expanded to a network of 5,000 verified carriers nationwide" },
   { year: "2017", event: "Reached 100,000 successful vehicle deliveries" },
   { year: "2020", event: "Launched our digital platform for instant online quotes" },
@@ -37,7 +37,7 @@ const values = [
   {
     icon: <Award className="w-6 h-6 text-orange-400" />,
     title: "Excellence",
-    desc: "A+ BBB rating, 4.9 stars on Google, and thousands of repeat customers speak for our quality.",
+    desc: "Thousands of repeat customers and a proven track record of successful shipments speak for our commitment to quality.",
   },
 ];
 

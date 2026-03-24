@@ -14,6 +14,7 @@ const services = [
   {
     icon: <Truck className="w-8 h-8 text-orange-400" />,
     title: "Open Auto Transport",
+    quoteType: "Open",
     price: "Most Popular",
     priceColor: "text-green-400",
     desc: "The most common and affordable way to ship your car. Your vehicle travels on an open multi-car trailer alongside other vehicles. Trusted by millions of Americans every year.",
@@ -28,6 +29,7 @@ const services = [
   {
     icon: <Shield className="w-8 h-8 text-blue-400" />,
     title: "Enclosed Auto Transport",
+    quoteType: "Enclosed",
     price: "Premium",
     priceColor: "text-blue-400",
     desc: "Ultimate protection for luxury, exotic, classic, or collector vehicles. Your car travels in a fully enclosed trailer, shielded from road debris, weather, and UV exposure.",
@@ -42,6 +44,7 @@ const services = [
   {
     icon: <Zap className="w-8 h-8 text-yellow-400" />,
     title: "Expedited Shipping",
+    quoteType: "Expedited",
     price: "Fast",
     priceColor: "text-yellow-400",
     desc: "Need your vehicle moved urgently? Our expedited service prioritizes your shipment in our carrier network for the fastest possible pickup and delivery.",
@@ -56,9 +59,11 @@ const services = [
   {
     icon: <Package className="w-8 h-8 text-purple-400" />,
     title: "Non-Running Vehicle Transport",
+    quoteType: "Open",
+    quoteCondition: "Non-Running",
     price: "Specialized",
     priceColor: "text-purple-400",
-    desc: "We transport inoperable vehicles with specialized equipment. Whether your car won't start, has a blown transmission, or needs major repairs — we get it there safely.",
+    desc: "We transport inoperable vehicles with specialized equipment. Whether your car won\'t start, has a blown transmission, or needs major repairs — we get it there safely.",
     features: [
       "Winch-assisted loading",
       "Specialized flatbed trailers",
@@ -70,6 +75,7 @@ const services = [
   {
     icon: <MapPin className="w-8 h-8 text-red-400" />,
     title: "Door-to-Door Transport",
+    quoteType: "Door-to-Door",
     price: "Convenient",
     priceColor: "text-red-400",
     desc: "Maximum convenience — our carrier picks up from your home or office and delivers directly to your specified address. No need to drive to a terminal.",
@@ -84,6 +90,7 @@ const services = [
   {
     icon: <Clock className="w-8 h-8 text-teal-400" />,
     title: "Snowbird & Seasonal Transport",
+    quoteType: "Snowbird/Seasonal",
     price: "Seasonal",
     priceColor: "text-teal-400",
     desc: "Moving between seasonal homes? We specialize in snowbird routes — Florida, Arizona, California — with carriers that run these routes weekly.",
@@ -141,7 +148,7 @@ export default function ServicesPage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/get-quote">
+              <Link href={`/get-quote?type=${encodeURIComponent(service.quoteType)}${service.quoteCondition ? `&condition=${encodeURIComponent(service.quoteCondition)}` : ""}`}>
                 <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white border-0">
                   Get a Quote
                 </Button>

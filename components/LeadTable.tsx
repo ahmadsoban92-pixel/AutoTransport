@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { Lead, LeadStatus } from "@/types/lead";
-import { Search, Filter, ArrowUpDown, Eye } from "lucide-react";
+import { Search, Filter, ArrowUpDown, Eye, User2 } from "lucide-react";
 
 const STATUS_COLORS: Record<LeadStatus, string> = {
   New: "bg-orange-500/20 text-orange-400 border-orange-500/30",
@@ -16,7 +16,14 @@ const STATUS_COLORS: Record<LeadStatus, string> = {
 
 const ALL_STATUSES: LeadStatus[] = ["New", "Contacted", "Quoted", "Booked", "Lost"];
 
-export function LeadTable({ basePath = "/leads" }: { basePath?: string }) {
+interface Props {
+  basePath?: string;
+  brokerId?: string;   // if set, filter to this broker's leads only
+  detailCtx?: string;  // ctx param to append to detail links (claim|mine|view)
+  showBrokerCol?: boolean; // show assigned broker column
+}
+
+export function LeadTable({ basePath = "/leads", brokerId, detailCtx = "view", showBrokerCol = false }: Props) {
   const router = useRouter();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,15 +33,16 @@ export function LeadTable({ basePath = "/leads" }: { basePath?: string }) {
 
   useEffect(() => {
     async function fetchLeads() {
-      const { data, error } = await supabase
-        .from("leads")
-        .select("*")
-        .order("created_at", { ascending: false });
+      let query = supabase.from("leads").select("*").order("created_at", { ascending: false });
+      if (brokerId) {
+        query = query.eq("assigned_broker_id", brokerId);
+      }
+      const { data, error } = await query;
       if (!error && data) setLeads(data as Lead[]);
       setLoading(false);
     }
     fetchLeads();
-  }, []);
+  }, [brokerId]);
 
   const filtered = leads
     .filter((l) => {
@@ -53,6 +61,8 @@ export function LeadTable({ basePath = "/leads" }: { basePath?: string }) {
       const tb = new Date(b.created_at).getTime();
       return sortDesc ? tb - ta : ta - tb;
     });
+
+  const goToDetail = (id: string) => router.push(`${basePath}/${id}?ctx=${detailCtx}`);
 
   return (
     <div>
@@ -102,6 +112,7 @@ export function LeadTable({ basePath = "/leads" }: { basePath?: string }) {
                 <th className="px-4 py-3 text-left text-xs font-semibold text-blue-400 uppercase tracking-wider hidden lg:table-cell">Vehicle</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-blue-400 uppercase tracking-wider hidden md:table-cell">Type</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-blue-400 uppercase tracking-wider">Status</th>
+                {showBrokerCol && <th className="px-4 py-3 text-left text-xs font-semibold text-blue-400 uppercase tracking-wider hidden lg:table-cell">Broker</th>}
                 <th className="px-4 py-3 text-left text-xs font-semibold text-blue-400 uppercase tracking-wider hidden lg:table-cell">Date</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-blue-400 uppercase tracking-wider">View</th>
               </tr>
@@ -119,7 +130,7 @@ export function LeadTable({ basePath = "/leads" }: { basePath?: string }) {
                 ))
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center text-blue-500">
+                  <td colSpan={9} className="px-4 py-12 text-center text-blue-500">
                     No leads found. {search || statusFilter !== "All" ? "Try adjusting your filters." : ""}
                   </td>
                 </tr>
@@ -128,7 +139,7 @@ export function LeadTable({ basePath = "/leads" }: { basePath?: string }) {
                   <tr
                     key={lead.id}
                     className="hover:bg-blue-950/20 transition-colors cursor-pointer"
-                    onClick={() => router.push(`${basePath}/${lead.id}`)}
+                    onClick={() => goToDetail(lead.id)}
                   >
                     <td className="px-4 py-4">
                       <div className="text-white font-medium">{lead.name}</div>
@@ -144,7 +155,7 @@ export function LeadTable({ basePath = "/leads" }: { basePath?: string }) {
                       {lead.vehicle_year} {lead.vehicle_make} {lead.vehicle_model}
                     </td>
                     <td className="px-4 py-4 hidden md:table-cell">
-                      <span className={`text-xs px-2 py-0.5 rounded-full border ${lead.transport_type === "Enclosed" ? "bg-blue-500/20 text-blue-400 border-blue-500/30" : "bg-gray-500/20 text-gray-400 border-gray-500/30"}`}>
+                      <span className="text-xs px-2 py-0.5 rounded-full border bg-gray-500/20 text-gray-400 border-gray-500/30">
                         {lead.transport_type}
                       </span>
                     </td>
@@ -153,12 +164,24 @@ export function LeadTable({ basePath = "/leads" }: { basePath?: string }) {
                         {lead.status}
                       </span>
                     </td>
+                    {showBrokerCol && (
+                      <td className="px-4 py-4 text-blue-400 text-xs hidden lg:table-cell">
+                        {lead.assigned_broker_email ? (
+                          <span className="flex items-center gap-1">
+                            <User2 className="w-3 h-3" />
+                            {lead.assigned_broker_email}
+                          </span>
+                        ) : (
+                          <span className="text-blue-700 italic">Unassigned</span>
+                        )}
+                      </td>
+                    )}
                     <td className="px-4 py-4 text-blue-400 text-xs hidden lg:table-cell">
                       {new Date(lead.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-4">
                       <button
-                        onClick={(e) => { e.stopPropagation(); router.push(`${basePath}/${lead.id}`); }}
+                        onClick={(e) => { e.stopPropagation(); goToDetail(lead.id); }}
                         className="p-1.5 rounded-lg bg-blue-900/40 text-blue-400 hover:text-orange-400 hover:bg-orange-500/20 transition-all"
                       >
                         <Eye className="w-3.5 h-3.5" />

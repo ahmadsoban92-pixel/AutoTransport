@@ -39,80 +39,145 @@
 
 /* ===== LIGHT MODE TOKEN OVERRIDES ===== */
 html.light {
-  --background: #f0f6ff;
-  --foreground: #0f172a;
-  --muted: #dde8f8;
-  --muted-foreground: #475569;
-  --border: #bfdbfe80;
-  --card: #e8f0fb;
-  --card-foreground: #0f172a;
-  --popover: #e8f0fb;
-  --popover-foreground: #0f172a;
+  --background: #fdf6e3;
+  --foreground: #1a1a2e;
+  --muted: #f2e8d5;
+  --muted-foreground: #4a4a6a;
+  --border: #d4b896;
+  --card: #faf0d7;
+  --card-foreground: #1a1a2e;
+  --popover: #faf0d7;
+  --popover-foreground: #1a1a2e;
   --primary: #1e3a5f;
-  --bauhaus-card-bg: #dde8f8;
-  --bauhaus-card-separator: #93c5fd;
-  --bauhaus-card-inscription-top: #475569;
-  --bauhaus-card-inscription-main: #0f172a;
-  --bauhaus-card-inscription-sub: #475569;
-  --bauhaus-card-inscription-progress-label: #334155;
-  --bauhaus-card-inscription-progress-value: #0f172a;
-  --bauhaus-card-progress-bar-bg: #bfdbfe;
-  --bauhaus-chronicle-bg: #dde8f8;
-  --bauhaus-chronicle-fg: #0f172a;
-  --bauhaus-chronicle-hover-fg: #0f172a;
+  --bauhaus-card-bg: #faf0d7;
+  --bauhaus-card-separator: #c8a87a;
+  --bauhaus-card-accent: #f97316;
+  --bauhaus-card-radius: 2em;
+  --bauhaus-card-border-width: 2px;
+  --bauhaus-card-inscription-top: #7a5c3a;
+  --bauhaus-card-inscription-main: #1a1a2e;
+  --bauhaus-card-inscription-sub: #5a4a3a;
+  --bauhaus-card-inscription-progress-label: #6b4f2a;
+  --bauhaus-card-inscription-progress-value: #1a1a2e;
+  --bauhaus-card-progress-bar-bg: #d4b896;
+  --bauhaus-chronicle-bg: #e8d5b0;
+  --bauhaus-chronicle-fg: #1a1a2e;
+  --bauhaus-chronicle-hover-fg: #1a1a2e;
 }
 
-/* Light mode: override all the hardcoded Tailwind dark colors */
+/* ===== [data-force-dark] — CRM always stays dark ===== */
+/* Reset all CSS variables to dark values inside data-force-dark, 
+   regardless of the html.light class on the document */
+[data-force-dark] {
+  --background: #060d1f;
+  --foreground: #e8eaf0;
+  --muted: #0f1f3d;
+  --muted-foreground: #93aec8;
+  --border: #1e3a5f40;
+  --card: #0f1f3d;
+  --card-foreground: #e8eaf0;
+  --popover: #0f1f3d;
+  --popover-foreground: #e8eaf0;
+  color-scheme: dark;
+}
+
+/* Additional dark hex overrides — covers CRM sidebar colors */
 html.light body,
-html.light [class*="bg-\[#060d1f\]"],
-html.light [class*="bg-\[#0a1628\]"],
-html.light [class*="bg-\[#0f1f3d\]"] {
+html.light :not([data-force-dark] *)[class*="bg-\[#060d1f\]"],
+html.light :not([data-force-dark] *)[class*="bg-\[#0a1628\]"],
+html.light :not([data-force-dark] *)[class*="bg-\[#0f1f3d\]"],
+html.light :not([data-force-dark] *)[class*="bg-\[#050c1a\]"],
+html.light :not([data-force-dark] *)[class*="bg-\[#080f20\]"],
+html.light :not([data-force-dark] *)[class*="bg-\[#060d1a\]"] {
   background-color: var(--background) !important;
 }
 
-html.light [class*="bg-blue-950"],
-html.light [class*="bg-\[#0a1628\]"] {
+html.light :not([data-force-dark] *)[class*="bg-blue-950"],
+html.light :not([data-force-dark] *)[class*="bg-blue-950\/20"],
+html.light :not([data-force-dark] *)[class*="bg-blue-950\/40"] {
   background-color: var(--muted) !important;
 }
 
 /* Text overrides for light mode */
-html.light [class*="text-white"] {
+html.light :not([data-force-dark] *)[class*="text-white"] {
   color: var(--foreground) !important;
 }
 
-html.light [class*="text-blue-300"],
-html.light [class*="text-blue-200"],
-html.light [class*="text-blue-400"] {
-  color: #475569 !important;
+html.light :not([data-force-dark] *)[class*="text-blue-100"],
+html.light :not([data-force-dark] *)[class*="text-blue-200"],
+html.light :not([data-force-dark] *)[class*="text-blue-300"],
+html.light :not([data-force-dark] *)[class*="text-blue-400"] {
+  color: #4a4a6a !important;
 }
 
-html.light [class*="text-blue-500"] {
+html.light :not([data-force-dark] *)[class*="text-blue-500"],
+html.light :not([data-force-dark] *)[class*="text-blue-600"] {
   color: #64748b !important;
 }
 
-/* Border overrides */
-html.light [class*="border-blue-900"],
-html.light [class*="border-blue-800"] {
-  border-color: #93c5fd40 !important;
+/* Border overrides: all structural dividers use 10% black in light mode.
+   Covers border-blue-N, border-white-N, border-orange-N, border-green-N,
+   border-purple-N, border-red-N, border-yellow-N, divide-blue-N, divide-white-N */
+html.light :not([data-force-dark] *)[class*="border-blue-"],
+html.light :not([data-force-dark] *)[class*="border-white"],
+html.light :not([data-force-dark] *)[class*="border-orange-"],
+html.light :not([data-force-dark] *)[class*="border-green-"],
+html.light :not([data-force-dark] *)[class*="border-purple-"],
+html.light :not([data-force-dark] *)[class*="border-red-"],
+html.light :not([data-force-dark] *)[class*="border-yellow-"],
+html.light :not([data-force-dark] *)[class*="divide-blue-"],
+html.light :not([data-force-dark] *)[class*="divide-white"] {
+  border-color: rgba(0, 0, 0, 0.10) !important;
+  --tw-divide-color: rgba(0, 0, 0, 0.10);
 }
 
-/* Card / section backgrounds in light mode */
-html.light [class*="bg-blue-950\/20"],
-html.light [class*="bg-blue-950\/40"] {
-  background-color: #e8f0fb !important;
+/* Card / panel backgrounds in light mode */
+html.light :not([data-force-dark] *)[class*="bg-blue-950\/20"],
+html.light :not([data-force-dark] *)[class*="bg-blue-950\/40"],
+html.light :not([data-force-dark] *)[class*="bg-blue-900\/20"],
+html.light :not([data-force-dark] *)[class*="bg-blue-900\/40"] {
+  background-color: var(--muted) !important; /* warm cream muted */
 }
 
-html.light [class*="from-\[#060d1f\]"],
-html.light [class*="via-\[#0a1628\]"],
-html.light [class*="to-\[#0f1f3d\]"],
-html.light [class*="from-\[#0a1628\]"],
-html.light [class*="to-\[#1e3a5f\]"] {
+/* ===== GRADIENT BACKGROUND OVERRIDES — exclude img-overlay / hero-overlay ===== */
+/* .img-overlay elements also carry from-[#060d1f] in their classes, and the
+   higher specificity of the :not([data-force-dark] *) rule would otherwise
+   paint them white and cover the images underneath.
+   Also covers CRM sidebar gradient: from-[#080f20] to-[#060d1a] */
+html.light :not([data-force-dark] *):not(.img-overlay):not(.hero-overlay)[class*="from-\[#060d1f\]"],
+html.light :not([data-force-dark] *):not(.img-overlay):not(.hero-overlay)[class*="via-\[#0a1628\]"],
+html.light :not([data-force-dark] *):not(.img-overlay):not(.hero-overlay)[class*="to-\[#0f1f3d\]"],
+html.light :not([data-force-dark] *):not(.img-overlay):not(.hero-overlay)[class*="from-\[#0a1628\]"],
+html.light :not([data-force-dark] *):not(.img-overlay):not(.hero-overlay)[class*="to-\[#1e3a5f\]"],
+html.light :not([data-force-dark] *):not(.img-overlay):not(.hero-overlay)[class*="from-\[#080f20\]"],
+html.light :not([data-force-dark] *):not(.img-overlay):not(.hero-overlay)[class*="from-\[#060d1a\]"],
+html.light :not([data-force-dark] *):not(.img-overlay):not(.hero-overlay)[class*="to-\[#060d1a\]"],
+html.light :not([data-force-dark] *):not(.img-overlay):not(.hero-overlay)[class*="from-\[#050c1a\]"],
+html.light :not([data-force-dark] *):not(.img-overlay):not(.hero-overlay)[class*="to-\[#050c1a\]"] {
   background: var(--background) !important;
 }
 
 /* Image overlays — transparent in light mode so photos are visible */
 html.light .img-overlay {
   background: transparent !important;
+}
+
+/* BauhausCard light mode — override the inline CSS variables with warm tones.
+   For custom properties, a rule with !important beats an inline style. */
+html.light .bauhaus-card {
+  --card-bg: #faf0d7 !important;
+  --card-border: #c8a87a !important;
+  --card-accent: #f97316 !important;
+  --card-text-top: #7a5c3a !important;
+  --card-text-main: #1a1a2e !important;
+  --card-text-sub: #5a4a3a !important;
+  --card-text-progress-label: #6b4f2a !important;
+  --card-text-progress-value: #1a1a2e !important;
+  --card-separator: #c8a87a !important;
+  --card-progress-bar-bg: #d4b896 !important;
+  background-image:
+    linear-gradient(var(--card-bg), var(--card-bg)),
+    linear-gradient(calc(var(--rotation, 4.2rad)), var(--card-accent) 0, var(--card-bg) 30%, transparent 80%) !important;
 }
 
 /* Hero background overlay — very light in light mode */
@@ -199,4 +264,21 @@ body {
 ::selection {
   background: #f97316;
   color: white;
+}
+
+/* ===== HIDE BROWSER NATIVE PASSWORD EYE ICON ===== */
+/* Chrome / Edge */
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-contacts-auto-fill-button {
+  visibility: hidden;
+  display: none !important;
+}
+/* Edge / IE reveal button */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+/* Firefox */
+input[type="password"] {
+  -moz-appearance: none;
 }

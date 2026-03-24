@@ -1,9 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { leadSchema, LeadFormData } from "@/lib/validators";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -15,6 +15,14 @@ const VEHICLE_MAKES = [
   "Land Rover","Lexus","Lincoln","Mazda","Mercedes-Benz","Mitsubishi",
   "Nissan","Porsche","RAM","Subaru","Tesla","Toyota","Volkswagen","Volvo","Other"
 ];
+
+const TRANSPORT_OPTIONS = [
+  { value: "Open", sub: "Most popular & affordable" },
+  { value: "Enclosed", sub: "Premium protection" },
+  { value: "Expedited", sub: "Priority pickup & delivery" },
+  { value: "Door-to-Door", sub: "Maximum convenience" },
+  { value: "Snowbird/Seasonal", sub: "Seasonal routes" },
+] as const;
 
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 40 }, (_, i) => currentYear + 1 - i);
@@ -50,15 +58,26 @@ const selectClass =
 
 export function QuoteForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  // Pre-select transport type and vehicle condition from URL params (set by Services page)
+  const preselectedType = searchParams.get("type") || "";
+  const preselectedCondition = searchParams.get("condition") || "";
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [selectedType, setSelectedType] = useState<string>(preselectedType);
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<LeadFormData>({
     resolver: zodResolver(leadSchema),
+    defaultValues: {
+      transport_type: (preselectedType as any) || undefined,
+      vehicle_condition: (preselectedCondition as any) || undefined,
+    },
   });
 
   const onSubmit = async (data: LeadFormData) => {
@@ -105,27 +124,13 @@ export function QuoteForm() {
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormField label="Full Name" error={errors.name?.message}>
-            <input
-              {...register("name")}
-              placeholder="John Smith"
-              className={inputClass}
-            />
+            <input {...register("name")} placeholder="John Smith" className={inputClass} />
           </FormField>
           <FormField label="Email Address" error={errors.email?.message}>
-            <input
-              {...register("email")}
-              type="email"
-              placeholder="john@example.com"
-              className={inputClass}
-            />
+            <input {...register("email")} type="email" placeholder="john@example.com" className={inputClass} />
           </FormField>
           <FormField label="Phone Number" error={errors.phone?.message}>
-            <input
-              {...register("phone")}
-              type="tel"
-              placeholder="(800) 555-0100"
-              className={inputClass}
-            />
+            <input {...register("phone")} type="tel" placeholder="(800) 555-0100" className={inputClass} />
           </FormField>
         </div>
       </div>
@@ -137,20 +142,10 @@ export function QuoteForm() {
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField label="Pickup ZIP Code" error={errors.origin_zip?.message}>
-            <input
-              {...register("origin_zip")}
-              placeholder="90210"
-              maxLength={5}
-              className={inputClass}
-            />
+            <input {...register("origin_zip")} placeholder="90210" maxLength={5} className={inputClass} />
           </FormField>
           <FormField label="Delivery ZIP Code" error={errors.destination_zip?.message}>
-            <input
-              {...register("destination_zip")}
-              placeholder="10001"
-              maxLength={5}
-              className={inputClass}
-            />
+            <input {...register("destination_zip")} placeholder="10001" maxLength={5} className={inputClass} />
           </FormField>
         </div>
       </div>
@@ -165,26 +160,18 @@ export function QuoteForm() {
             <select {...register("vehicle_make")} className={selectClass}>
               <option value="" className="bg-blue-950">Select make...</option>
               {VEHICLE_MAKES.map((make) => (
-                <option key={make} value={make} className="bg-blue-950">
-                  {make}
-                </option>
+                <option key={make} value={make} className="bg-blue-950">{make}</option>
               ))}
             </select>
           </FormField>
           <FormField label="Vehicle Model" error={errors.vehicle_model?.message}>
-            <input
-              {...register("vehicle_model")}
-              placeholder="Camry, F-150, Model 3..."
-              className={inputClass}
-            />
+            <input {...register("vehicle_model")} placeholder="Camry, F-150, Model 3..." className={inputClass} />
           </FormField>
           <FormField label="Vehicle Year" error={errors.vehicle_year?.message}>
             <select {...register("vehicle_year")} className={selectClass}>
               <option value="" className="bg-blue-950">Select year...</option>
               {years.map((year) => (
-                <option key={year} value={year} className="bg-blue-950">
-                  {year}
-                </option>
+                <option key={year} value={year} className="bg-blue-950">{year}</option>
               ))}
             </select>
           </FormField>
@@ -199,21 +186,24 @@ export function QuoteForm() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField label="Transport Type" error={errors.transport_type?.message}>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {[
-                { value: "Open", sub: "Most popular & affordable" },
-                { value: "Enclosed", sub: "Premium protection" },
-                { value: "Expedited", sub: "Priority pickup & delivery" },
-                { value: "Door-to-Door", sub: "Maximum convenience" },
-                { value: "Snowbird/Seasonal", sub: "Seasonal routes" },
-              ].map(({ value, sub }) => (
+              {TRANSPORT_OPTIONS.map(({ value, sub }) => (
                 <label
                   key={value}
-                  className="flex items-center gap-2 p-3 rounded-lg border border-blue-800/50 bg-blue-950/20 cursor-pointer hover:border-orange-500/50 transition-all"
+                  className={`flex items-center gap-2 p-3 rounded-lg border cursor-pointer transition-all ${
+                    selectedType === value
+                      ? "border-orange-500 bg-orange-500/10"
+                      : "border-blue-800/50 bg-blue-950/20 hover:border-orange-500/50"
+                  }`}
                 >
                   <input
                     {...register("transport_type")}
                     type="radio"
                     value={value}
+                    checked={selectedType === value}
+                    onChange={() => {
+                      setSelectedType(value);
+                      setValue("transport_type", value as any);
+                    }}
                     className="accent-orange-500"
                   />
                   <div>
