@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Metadata } from "next";
 import { QuoteForm } from "@/components/QuoteForm";
 import { Shield, Clock, Phone, CheckCircle } from "lucide-react";
@@ -40,7 +41,13 @@ export default function GetQuotePage() {
 
         {/* Form card */}
         <div className="bg-[#0a1628] border border-blue-800/30 rounded-3xl p-6 md:p-10">
-          <QuoteForm />
+          <Suspense fallback={
+            <div className="animate-pulse space-y-4">
+              {[1,2,3,4].map(i => <div key={i} className="h-12 rounded-xl bg-blue-900/30" />)}
+            </div>
+          }>
+            <QuoteForm />
+          </Suspense>
         </div>
 
 
