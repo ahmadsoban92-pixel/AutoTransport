@@ -153,7 +153,7 @@ export default function LeadDetailPage() {
               <InfoRow label="Year" value={String(lead.vehicle_year)} />
               <InfoRow label="Make" value={lead.vehicle_make} />
               <InfoRow label="Model" value={lead.vehicle_model} />
-              <InfoRow label="Condition" value={lead.vehicle_condition} />
+              <InfoRow label="Condition" value={lead.vehicle_condition ?? ""} />
               <InfoRow label="Transport Type" value={lead.transport_type} />
             </div>
           </motion.div>
