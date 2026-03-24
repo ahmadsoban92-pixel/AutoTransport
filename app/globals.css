@@ -81,21 +81,38 @@ html.light {
   color-scheme: dark;
 }
 
-/* Additional dark hex overrides — covers CRM sidebar colors */
+/* Dark-mode section backgrounds map to DIFFERENTIATED warm cream tones in light mode.
+   Mirrors the dark-mode technique: each distinct dark shade maps to a distinct light shade.
+   Level 1 (darkest dark): #060d1f, #050c1a  -> lightest cream:  #fdf6e3
+   Level 2 (mid dark):     #0a1628, #080f20  -> parchment:       #f5ead4
+   Level 3 (lighter dark): #0f1f3d, #060d1a  -> antique paper:   #ede1ca
+*/
+
+/* Level 1 — primary sections */
 html.light body,
 html.light :not([data-force-dark] *)[class*="bg-\[#060d1f\]"],
+html.light :not([data-force-dark] *)[class*="bg-\[#050c1a\]"] {
+  background-color: #fdf6e3 !important;
+}
+
+/* Level 2 — alternating sections */
 html.light :not([data-force-dark] *)[class*="bg-\[#0a1628\]"],
+html.light :not([data-force-dark] *)[class*="bg-\[#080f20\]"] {
+  background-color: #f5ead4 !important;
+}
+
+/* Level 3 — card inner / sidebar */
 html.light :not([data-force-dark] *)[class*="bg-\[#0f1f3d\]"],
-html.light :not([data-force-dark] *)[class*="bg-\[#050c1a\]"],
-html.light :not([data-force-dark] *)[class*="bg-\[#080f20\]"],
 html.light :not([data-force-dark] *)[class*="bg-\[#060d1a\]"] {
-  background-color: var(--background) !important;
+  background-color: #ede1ca !important;
 }
 
 html.light :not([data-force-dark] *)[class*="bg-blue-950"],
 html.light :not([data-force-dark] *)[class*="bg-blue-950\/20"],
-html.light :not([data-force-dark] *)[class*="bg-blue-950\/40"] {
-  background-color: var(--muted) !important;
+html.light :not([data-force-dark] *)[class*="bg-blue-950\/40"],
+html.light :not([data-force-dark] *)[class*="bg-blue-900\/20"],
+html.light :not([data-force-dark] *)[class*="bg-blue-900\/40"] {
+  background-color: #ede1ca !important;
 }
 
 /* Text overrides for light mode */
