@@ -1,12 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
+
+// ─── Gmail SMTP transporter ──────────────────────────────────────────────────
+// Env vars needed (add to .env.local AND Vercel dashboard):
+//   GMAIL_USER        — your Gmail address, e.g. yourteam@gmail.com
+//   GMAIL_APP_PASSWORD — 16-char App Password (Google Account → Security → 2-Step → App passwords)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function createTransporter() {
+  const user = process.env.GMAIL_USER;
+  const pass = process.env.GMAIL_APP_PASSWORD;
+
+  if (!user || !pass) return null;
+
+  return nodemailer.createTransport({
+    service: "gmail",
+    auth: { user, pass },
+  });
+}
 
 export async function POST(request: NextRequest) {
-  const resendKey = process.env.RESEND_API_KEY;
+  const transporter = createTransporter();
 
-  if (!resendKey || resendKey.startsWith("re_your")) {
+  if (!transporter) {
     return NextResponse.json(
-      { error: "Resend API key not configured. Add RESEND_API_KEY to .env.local" },
+      {
+        error:
+          "Email not configured. Add GMAIL_USER and GMAIL_APP_PASSWORD to your environment variables.",
+      },
       { status: 503 }
     );
   }
@@ -16,28 +37,27 @@ export async function POST(request: NextRequest) {
     const { to, toName, subject, html, text } = body;
 
     if (!to || !subject || (!html && !text)) {
-      return NextResponse.json({ error: "Missing required fields: to, subject, html or text" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing required fields: to, subject, and html or text" },
+        { status: 400 }
+      );
     }
 
-    const resend = new Resend(resendKey);
+    const fromName = "AutoTransportPro";
+    const fromAddress = process.env.GMAIL_USER!;
 
-    const fromAddress = process.env.RESEND_FROM_EMAIL || "AutoTransportPro <noreply@autotransportpro.com>";
-
-    const { data, error } = await resend.emails.send({
-      from: fromAddress,
-      to: [to],
+    const info = await transporter.sendMail({
+      from: `"${fromName}" <${fromAddress}>`,
+      to: toName ? `"${toName}" <${to}>` : to,
       subject,
       html: html || `<p>${text}</p>`,
       text: text || "",
     });
 
-    if (error) {
-      console.error("Resend error:", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ success: true, id: data?.id }, { status: 200 });
-  } catch (err: any) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ success: true, id: info.messageId }, { status: 200 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Internal server error";
+    console.error("Nodemailer error:", err);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -56,7 +56,7 @@ export default function AboutPage() {
               </div>
             </div>
           </div>
-          <h1 className="text-5xl font-bold text-white mb-6">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6 break-words">
             About <span className="text-orange-400">AutoTransportPro</span>
           </h1>
           <p className="text-xl text-blue-300 leading-relaxed max-w-3xl mx-auto">

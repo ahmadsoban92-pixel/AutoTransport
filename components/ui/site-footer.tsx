@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Monitor, Moon, Sun, Phone, Mail, MapPin, MessageCircle, Truck } from "lucide-react";
+import { Moon, Sun, Phone, Mail, MapPin, MessageCircle, Truck } from "lucide-react";
 import { EmailLink } from "@/components/EmailLink";
 import Link from "next/link";
 import { useTheme } from "next-themes";
@@ -104,7 +104,6 @@ export function SiteFooter() {
 }
 
 const themes = [
-  { key: "system", icon: Monitor, label: "System theme" },
   { key: "light", icon: Sun, label: "Light theme" },
   { key: "dark", icon: Moon, label: "Dark theme" },
 ];
