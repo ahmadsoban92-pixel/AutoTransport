@@ -5,7 +5,7 @@ import { ChronicleButton } from "./chronicle-button";
 const BAUHAUS_CARD_STYLES = `
 .bauhaus-card {
   position: relative;
-  z-index: 555;
+  z-index: 10;
   max-width: 20rem;
   min-height: 20rem;
   width: 90%;

@@ -314,8 +314,8 @@ export default function HomeClient() {
         {/* Marquee container */}
         <div className="relative">
           {/* Left & right fade masks */}
-          <div className="absolute left-0 top-0 bottom-0 w-24 z-10 bg-gradient-to-r from-[#060d1f] to-transparent pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-0 w-24 z-10 bg-gradient-to-l from-[#060d1f] to-transparent pointer-events-none" />
+          <div className="absolute left-0 top-0 bottom-0 w-24 z-10 pointer-events-none" style={{ background: "linear-gradient(to right, var(--marquee-fade-bg, #060d1f), transparent)" }} />
+          <div className="absolute right-0 top-0 bottom-0 w-24 z-10 pointer-events-none" style={{ background: "linear-gradient(to left, var(--marquee-fade-bg, #060d1f), transparent)" }} />
           <div
             className="flex gap-6"
             style={{

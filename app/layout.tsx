@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "WESAutoTransport - Nationwide Vehicle Shipping",
   description:
-    "America's most trusted auto transport brokerage. Get a free quote for safe, reliable, and affordable vehicle shipping across all 50 states.",
+    "One Of The Best Auto Transport Company in America. Get a free quote for safe, reliable, and affordable vehicle shipping across all 50 states.",
 };
 
 export default function RootLayout({

@@ -65,6 +65,8 @@ html.light {
   --bauhaus-chronicle-bg: #e8d5b0;
   --bauhaus-chronicle-fg: #1a1a2e;
   --bauhaus-chronicle-hover-fg: #1a1a2e;
+  /* Marquee fade must match the section bg in light mode */
+  --marquee-fade-bg: #fdf6e3;
 }
 
 /* ===== [data-force-dark] — CRM always stays dark ===== */
