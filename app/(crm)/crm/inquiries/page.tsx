@@ -1,8 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { MessageCircle, Phone, Mail, Clock, User, CheckCircle2, Trash2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  MessageCircle, Phone, Mail, Clock, User, CheckCircle2,
+  Trash2, X, Send, Loader2,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const STORAGE_KEY = "crm_dismissed_inquiries";
 
@@ -15,12 +19,127 @@ interface Inquiry {
   created_at: string;
 }
 
+// ─── Email Compose Modal (same pattern as lead detail page) ───────────────────
+function EmailComposeModal({
+  inquiry,
+  onClose,
+}: {
+  inquiry: Inquiry;
+  onClose: () => void;
+}) {
+  const [subject, setSubject] = useState("Following up on your WESAutoTransport inquiry");
+  const [body, setBody] = useState(
+    `Hi ${inquiry.name},\n\nThank you for reaching out to WESAutoTransport.\n\nWe received your inquiry and our team will be happy to assist you. Please let us know if you have any questions about our services.\n\nBest regards,\nWESAutoTransport Team`
+  );
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [err, setErr] = useState("");
+
+  const handleSend = async () => {
+    if (!inquiry.email) return;
+    setSending(true);
+    setErr("");
+    try {
+      const res = await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: inquiry.email,
+          toName: inquiry.name,
+          subject,
+          html: body.replace(/\n/g, "<br/>"),
+          text: body,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to send");
+      setSent(true);
+      setTimeout(onClose, 1800);
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : "Failed to send email.");
+    }
+    setSending(false);
+  };
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ scale: 0.96, opacity: 0, y: 16 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.96, opacity: 0, y: 16 }}
+          className="bg-[#0a1628] border border-blue-800/40 rounded-2xl p-6 w-full max-w-lg shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h3 className="text-white font-semibold">Compose Email</h3>
+              <p className="text-blue-400 text-xs mt-0.5">To: {inquiry.name} &lt;{inquiry.email}&gt;</p>
+            </div>
+            <button onClick={onClose} className="text-blue-500 hover:text-white transition-colors">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {sent ? (
+            <div className="flex flex-col items-center py-8 text-center">
+              <CheckCircle2 className="w-10 h-10 text-green-400 mb-3" />
+              <p className="text-white font-medium">Email sent successfully!</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs text-blue-400 uppercase tracking-wider mb-1 block">Subject</label>
+                <input
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  className="w-full bg-blue-950/50 border border-blue-800/40 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/40"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-blue-400 uppercase tracking-wider mb-1 block">Message</label>
+                <textarea
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  rows={8}
+                  className="w-full bg-blue-950/50 border border-blue-800/40 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/40 resize-none"
+                />
+              </div>
+              {err && <p className="text-red-400 text-xs">{err}</p>}
+              <div className="flex justify-end gap-3 pt-1">
+                <Button variant="ghost" onClick={onClose} className="text-blue-400 hover:text-white">
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSend}
+                  disabled={sending || !subject || !body}
+                  className="bg-orange-500 hover:bg-orange-600 text-white border-0 disabled:opacity-40"
+                >
+                  {sending ? <><Loader2 className="mr-2 w-4 h-4 animate-spin" />Sending...</> : <><Send className="mr-2 w-4 h-4" />Send Email</>}
+                </Button>
+              </div>
+            </div>
+          )}
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default function InquiriesPage() {
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const [errorMsg, setErrorMsg] = useState("");
+  const [composing, setComposing] = useState<Inquiry | null>(null);
 
   // Load dismissed IDs from localStorage on mount
   useEffect(() => {
@@ -30,7 +149,6 @@ export default function InquiriesPage() {
     } catch {}
   }, []);
 
-  // Persist dismissed IDs to localStorage whenever they change
   const dismissInquiry = (id: string) => {
     setDismissed((prev) => {
       const next = new Set([...prev, id]);
@@ -39,7 +157,6 @@ export default function InquiriesPage() {
     });
   };
 
-  // Restore all dismissed (clear localStorage)
   const restoreAll = () => {
     setDismissed(new Set());
     try { localStorage.removeItem(STORAGE_KEY); } catch {}
@@ -59,7 +176,7 @@ export default function InquiriesPage() {
       });
   }, []);
 
-  // Normalize phone for WA — avoid double country code
+  // Normalize phone for WA
   const normalizePhone = (raw: string) => {
     const digits = raw.replace(/\D/g, "");
     if (digits.startsWith("92")) return digits;
@@ -69,7 +186,7 @@ export default function InquiriesPage() {
 
   const waMsg = (inq: Inquiry) =>
     `https://wa.me/${normalizePhone(inq.phone)}?text=${encodeURIComponent(
-      `Hi ${inq.name}, thank you for contacting AutoTransportPro! How can we help you today?`
+      `Hi ${inq.name}, thank you for contacting WESAutoTransport! How can we help you today?`
     )}`;
 
   const filtered = inquiries.filter((inq) => {
@@ -87,6 +204,11 @@ export default function InquiriesPage() {
 
   return (
     <div className="p-6 md:p-8">
+      {/* Email compose modal */}
+      {composing && (
+        <EmailComposeModal inquiry={composing} onClose={() => setComposing(null)} />
+      )}
+
       <div className="mb-8 flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-3">
@@ -167,12 +289,12 @@ export default function InquiriesPage() {
                       <Phone className="w-3 h-3" /> {inq.phone}
                     </a>
                     {inq.email && (
-                      <a
-                        href={`mailto:${inq.email}`}
+                      <button
+                        onClick={() => setComposing(inq)}
                         className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 transition-colors"
                       >
                         <Mail className="w-3 h-3" /> {inq.email}
-                      </a>
+                      </button>
                     )}
                     <a href={waMsg(inq)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors">
                       <MessageCircle className="w-3 h-3" /> WhatsApp

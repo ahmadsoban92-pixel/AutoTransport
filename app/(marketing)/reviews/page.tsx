@@ -13,7 +13,7 @@ interface Review {
 
 const SEED_REVIEWS: Review[] = [
   { author_name: "Ahmed Khan", rating: 5, content: "Excellent service! My car was delivered on time and in perfect condition. The team was very professional and kept me updated throughout the entire process.", created_at: "2026-02-01" },
-  { author_name: "Sarah Williams", rating: 5, content: "I was nervous about shipping my classic car across the country, but AutoTransportPro made it so easy. The enclosed transport option gave me total peace of mind.", created_at: "2026-01-15" },
+  { author_name: "Sarah Williams", rating: 5, content: "I was nervous about shipping my classic car across the country, but WESAutoTransport made it so easy. The enclosed transport option gave me total peace of mind.", created_at: "2026-01-15" },
   { author_name: "Mohammad Rizwan", rating: 4, content: "Good experience overall. The quote was accurate and there were no hidden fees. Delivery took one extra day but they communicated the delay well.", created_at: "2026-01-05" },
   { author_name: "Emily Chen", rating: 5, content: "Used their expedited service for a last-minute move and they delivered! My Toyota arrived two days early. Will definitely use again.", created_at: "2025-12-20" },
   { author_name: "James Mitchell", rating: 5, content: "Third time using their service. Consistent quality every time. The door-to-door option is incredibly convenient. Highly recommend!", created_at: "2025-12-10" },

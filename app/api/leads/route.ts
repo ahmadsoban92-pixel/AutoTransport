@@ -86,5 +86,5 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET() {
-  return NextResponse.json({ message: "AutoTransportPro Leads API v1.0" });
+  return NextResponse.json({ message: "WESAutoTransport Leads API v1.0" });
 }

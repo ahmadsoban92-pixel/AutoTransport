@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Truck, Shield, Clock, MapPin, Zap, Package } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Services | AutoTransportPro",
+  title: "Services | WESAutoTransport",
   description:
-    "Explore AutoTransportPro's auto transport services: open transport, enclosed transport, expedited shipping, non-running vehicles, and door-to-door delivery.",
+    "Explore WESAutoTransport's auto transport services: open transport, enclosed transport, expedited shipping, non-running vehicles, and door-to-door delivery.",
 };
 
 const services = [

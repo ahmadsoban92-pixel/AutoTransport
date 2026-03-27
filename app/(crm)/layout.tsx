@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Broker Terminal | AutoTransportPro CRM",
-  description: "Internal CRM for AutoTransportPro brokers",
+  title: "Broker Terminal | WESAutoTransport CRM",
+  description: "Internal CRM for WESAutoTransport brokers",
 };
 
 // Bare wrapper — the inner crm/layout.tsx handles all nav UI

@@ -63,7 +63,7 @@ export default function CRMLoginPage() {
             <Truck className="w-8 h-8 text-orange-400" />
           </div>
           <h1 className="text-2xl font-bold text-white">Broker Terminal</h1>
-          <p className="text-sm text-blue-400 mt-1">AutoTransportPro Internal CRM</p>
+          <p className="text-sm text-blue-400 mt-1">WESAutoTransport Internal CRM</p>
         </div>
 
         <div className="bg-[#0a1628] border border-blue-800/30 rounded-2xl p-8">

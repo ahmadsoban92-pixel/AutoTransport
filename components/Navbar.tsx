@@ -24,7 +24,7 @@ export function SiteNavbar() {
         <Link href="/" className="flex items-center gap-2">
           <Truck className="w-6 h-6 text-orange-400" />
           <span className="text-lg font-bold text-white">
-            AutoTransport<span className="text-orange-400">Pro</span>
+            WESAuto<span className="text-orange-400">Transport</span>
           </span>
         </Link>
         <div className="flex items-center gap-2">

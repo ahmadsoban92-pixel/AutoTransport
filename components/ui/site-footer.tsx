@@ -44,7 +44,7 @@ export function SiteFooter() {
           <div className="max-w-xs">
             <div className="flex items-center gap-2 mb-1">
               <Truck className="w-6 h-6 text-orange-400" />
-              <span className="text-xl font-bold text-white">AutoTransport<span className="text-orange-400">Pro</span></span>
+              <span className="text-xl font-bold text-white">WESAuto<span className="text-orange-400">Transport</span></span>
             </div>
             <p className="text-xs text-orange-300 font-semibold mb-3">WES Solutions</p>
             <p className="text-sm text-blue-300 leading-relaxed">
@@ -94,7 +94,7 @@ export function SiteFooter() {
             <span className="text-sm text-blue-300">All systems operational</span>
           </div>
           <p className="text-xs text-blue-500">
-            © {new Date().getFullYear()} AutoTransportPro · WES Solutions. All rights reserved.
+            © {new Date().getFullYear()} WESAutoTransport · WES Solutions. All rights reserved.
           </p>
           <ThemeSwitcher />
         </div>

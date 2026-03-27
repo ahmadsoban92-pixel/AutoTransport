@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Truck, Target, Users, Award, Shield, CheckCircle } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "About Us | AutoTransportPro",
+  title: "About Us | WESAutoTransport",
   description:
-    "Learn about AutoTransportPro — America's trusted auto transport brokerage connecting customers with verified carriers since 2010.",
+    "Learn about WESAutoTransport — America's trusted auto transport brokerage connecting customers with verified carriers since 2010.",
 };
 
 const milestones = [
@@ -57,7 +57,7 @@ export default function AboutPage() {
             </div>
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6 break-words">
-            About <span className="text-orange-400">AutoTransportPro</span>
+            About <span className="text-orange-400">WESAutoTransport</span>
           </h1>
           <p className="text-xl text-blue-300 leading-relaxed max-w-3xl mx-auto">
             We&apos;re America&apos;s most trusted auto transport brokerage — connecting car owners with vetted, insured carriers since 2010. Our mission is simple: make vehicle shipping stress-free.

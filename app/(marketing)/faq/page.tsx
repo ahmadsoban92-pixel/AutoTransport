@@ -72,7 +72,7 @@ export default function FaqPage() {
           <span className="text-orange-400 text-sm font-semibold uppercase tracking-widest">Got Questions?</span>
           <h1 className="text-5xl font-bold text-white mt-3 mb-4">Frequently Asked Questions</h1>
           <p className="text-blue-300">
-            Everything you need to know about shipping your vehicle with AutoTransportPro.
+            Everything you need to know about shipping your vehicle with WESAutoTransport.
           </p>
         </div>
       </section>

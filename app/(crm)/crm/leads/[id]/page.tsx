@@ -37,10 +37,10 @@ function EmailComposeModal({
   lead: Lead;
   onClose: () => void;
 }) {
-  const defaultSubject = `Your Auto Transport Quote – AutoTransportPro`;
+  const defaultSubject = `Your Auto Transport Quote – WESAutoTransport`;
   const defaultBody = `Hi ${lead.name},
 
-Thank you for requesting a quote with AutoTransportPro. We have reviewed your request:
+Thank you for requesting a quote with WESAutoTransport. We have reviewed your request:
 
 • Vehicle: ${lead.vehicle_year} ${lead.vehicle_make} ${lead.vehicle_model}
 • Route: ${lead.origin_zip} → ${lead.destination_zip}
@@ -49,7 +49,7 @@ Thank you for requesting a quote with AutoTransportPro. We have reviewed your re
 Your dedicated broker will be in touch shortly with your personalized quote.
 
 Best regards,
-AutoTransportPro Team`;
+WESAutoTransport Team`;
 
   const [subject, setSubject] = useState(defaultSubject);
   const [body, setBody] = useState(defaultBody);
@@ -68,7 +68,7 @@ AutoTransportPro Team`;
         toName: lead.name,
         subject,
         html: `<div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;">
-          <h2 style="color:#f97316;margin-top:0;">AutoTransportPro</h2>
+          <h2 style="color:#f97316;margin-top:0;">WESAutoTransport</h2>
           ${htmlBody}
         </div>`,
         text: body,
@@ -167,9 +167,9 @@ async function sendAutoEmail(lead: Lead): Promise<void> {
       body: JSON.stringify({
         to: lead.email,
         toName: lead.name,
-        subject: "Your Auto Transport Quote – AutoTransportPro",
+        subject: "Your Auto Transport Quote – WESAutoTransport",
         html: `<div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;">
-  <h2 style="color:#f97316;margin-top:0;">AutoTransportPro</h2>
+  <h2 style="color:#f97316;margin-top:0;">WESAutoTransport</h2>
   <p>Hi ${lead.name},</p>
   <p>Great news — your quote request has been picked up by one of our dedicated brokers! Here's a summary of what we've received:</p>
   <ul style="background:#f9fafb;padding:16px 24px;border-radius:8px;border-left:4px solid #f97316;margin:16px 0;">
@@ -178,7 +178,7 @@ async function sendAutoEmail(lead: Lead): Promise<void> {
     <li><strong>Transport Type:</strong> ${lead.transport_type}</li>
   </ul>
   <p>Your broker will be reaching out to you within <strong>2–30 minutes</strong> with a personalized rate and to answer any questions you may have.</p>
-  <p style="margin-top:24px;">Best regards,<br/><strong>AutoTransportPro Team</strong></p>
+  <p style="margin-top:24px;">Best regards,<br/><strong>WESAutoTransport Team</strong></p>
 </div>`,
         text: `Hi ${lead.name},\nYour quote has been picked up. Your broker will contact you within 2-30 minutes.\n\nVehicle: ${lead.vehicle_year} ${lead.vehicle_make} ${lead.vehicle_model}\nRoute: ${lead.origin_zip} → ${lead.destination_zip}\nTransport Type: ${lead.transport_type}`,
       }),
@@ -273,7 +273,7 @@ export default function LeadDetailPage() {
   }
 
   const waMsg = encodeURIComponent(
-    `Hi ${lead.name}, this is AutoTransportPro. We received your quote request for your ${lead.vehicle_year} ${lead.vehicle_make} ${lead.vehicle_model} from ${lead.origin_zip} to ${lead.destination_zip}. I'd love to help you get the best rate. Would now be a good time to chat?`
+    `Hi ${lead.name}, this is WESAutoTransport. We received your quote request for your ${lead.vehicle_year} ${lead.vehicle_make} ${lead.vehicle_model} from ${lead.origin_zip} to ${lead.destination_zip}. I'd love to help you get the best rate. Would now be a good time to chat?`
   );
 
   return (

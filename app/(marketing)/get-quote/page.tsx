@@ -4,7 +4,7 @@ import { QuoteForm } from "@/components/QuoteForm";
 import { Shield, Clock, Phone, CheckCircle } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Get a Free Quote | AutoTransportPro",
+  title: "Get a Free Quote | WESAutoTransport",
   description:
     "Get a free auto transport quote in 60 seconds. Fill out our simple form and connect with top-rated carriers nationwide.",
 };

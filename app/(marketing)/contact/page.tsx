@@ -10,9 +10,20 @@ export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
+
+  const validatePhone = (value: string) => {
+    const digits = value.replace(/\D/g, "");
+    if (!value) return "Phone number is required.";
+    if (digits.length < 7) return "Phone number is too short (min 7 digits).";
+    if (digits.length > 15) return "Phone number is too long (max 15 digits).";
+    return "";
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const pErr = validatePhone(formData.phone);
+    if (pErr) { setPhoneError(pErr); return; }
     setSubmitting(true);
     setError("");
     try {
@@ -143,14 +154,24 @@ export default function ContactPage() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-blue-200 mb-1.5">Phone</label>
+                  <label className="block text-sm font-medium text-blue-200 mb-1.5">Phone <span className="text-orange-400">*</span></label>
                   <input
                     type="tel"
+                    required
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, phone: e.target.value });
+                      if (phoneError) setPhoneError(validatePhone(e.target.value));
+                    }}
+                    onBlur={() => setPhoneError(validatePhone(formData.phone))}
                     placeholder="+1 (800) 000-0000"
-                    className="w-full rounded-lg border border-blue-800/50 bg-blue-950/40 px-3 py-2.5 text-white text-sm placeholder:text-blue-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+                    className={`w-full rounded-lg border ${
+                      phoneError ? "border-red-500/60 focus:ring-red-500/40" : "border-blue-800/50 focus:ring-orange-500/50 focus:border-orange-500"
+                    } bg-blue-950/40 px-3 py-2.5 text-white text-sm placeholder:text-blue-400 focus:outline-none focus:ring-2 transition-all`}
                   />
+                  {phoneError && (
+                    <p className="text-red-400 text-xs mt-1">{phoneError}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-blue-200 mb-1.5">Email</label>

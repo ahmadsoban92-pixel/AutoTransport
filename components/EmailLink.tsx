@@ -4,8 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { Mail, ExternalLink } from "lucide-react";
 
 const COMPANY_EMAIL = "info@wessolutions.com";
-const SUBJECT = "Inquiry – AutoTransportPro";
-const BODY = "Hi AutoTransportPro team,\n\nI'd like to get in touch regarding ";
+const SUBJECT = "Inquiry – WESAutoTransport";
+const BODY = "Hi WESAutoTransport team,\n\nI'd like to get in touch regarding ";
 
 interface Props {
   /** Class applied to the trigger button */

@@ -25,7 +25,7 @@ interface Review { name: string; location?: string; author_name?: string; rating
 
 const HARDCODED_REVIEWS: Review[] = [
   { name: "Michael T.", location: "New York → California", rating: 5, text: "Absolutely seamless experience. My car arrived 2 days early and in perfect condition. The broker kept me updated throughout the entire journey." },
-  { name: "Sarah K.", location: "Texas → Florida", rating: 5, text: "Quoted 3 other companies and AutoTransportPro beat them all on price AND delivery speed. Will definitely use again for my next move." },
+  { name: "Sarah K.", location: "Texas → Florida", rating: 5, text: "Quoted 3 other companies and WESAutoTransport beat them all on price AND delivery speed. Will definitely use again for my next move." },
   { name: "James R.", location: "Chicago → Arizona", rating: 5, text: "Had a classic 1967 Mustang to ship. They arranged enclosed transport, and the car arrived without a scratch. Worth every penny." },
   { name: "Ahmed K.", rating: 5, text: "Excellent service! My car was delivered on time and in perfect condition." },
   { name: "Emily C.", rating: 5, text: "Used their expedited service for a last-minute move and they delivered! My Toyota arrived two days early." },
@@ -236,7 +236,7 @@ export default function HomeClient() {
             className="text-center mb-16"
           >
             <span className="text-orange-400 text-sm font-semibold uppercase tracking-widest">Why Us</span>
-            <h2 className="text-4xl font-bold text-white mt-3">Why Choose AutoTransportPro?</h2>
+            <h2 className="text-4xl font-bold text-white mt-3">Why Choose WESAutoTransport?</h2>
             <p className="text-blue-300 mt-4 max-w-2xl mx-auto">
               We&apos;re more than a broker — we&apos;re your dedicated transport partner.
             </p>

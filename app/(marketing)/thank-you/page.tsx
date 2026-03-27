@@ -33,7 +33,7 @@ export default function ThankYouPage() {
             Quote Request <span className="text-green-400">Received!</span>
           </h1>
           <p className="text-blue-300 text-lg mb-8 leading-relaxed">
-            Thank you for choosing AutoTransportPro. Your dedicated broker will review your request and contact you within <strong className="text-white">2–30 minutes</strong> with a personalized quote.
+            Thank you for choosing WESAutoTransport. Your dedicated broker will review your request and contact you within <strong className="text-white">2–30 minutes</strong> with a personalized quote.
           </p>
         </motion.div>
 

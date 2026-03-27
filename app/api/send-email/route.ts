@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const fromName = "AutoTransportPro";
+    const fromName = "WESAutoTransport";
     const fromAddress = process.env.GMAIL_USER!;
 
     const info = await transporter.sendMail({
