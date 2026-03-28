@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { Star, Send, User, MessageCircle, CheckCircle, Loader2 } from "lucide-react";
 
 interface Review {
@@ -98,15 +99,17 @@ export default function ReviewsPage() {
     <div className="min-h-screen bg-[#060d1f] pt-28 pb-16">
       <div className="max-w-5xl mx-auto px-6">
         {/* Header */}
-        <div className="text-center mb-14">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}
+          className="text-center mb-14">
           <span className="text-orange-400 text-sm font-semibold uppercase tracking-widest">Customer Reviews</span>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mt-3 mb-4">What Our Customers Say</h1>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mt-3 mb-4">What Our Customers Say</h1>
           <div className="flex items-center justify-center gap-3 mt-4">
             <StarRating rating={Math.round(Number(avgRating))} />
             <span className="text-2xl font-bold text-white">{avgRating}</span>
             <span className="text-blue-400 text-sm">({reviews.length} reviews)</span>
           </div>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Submit Review Form */}
@@ -170,24 +173,28 @@ export default function ReviewsPage() {
           {/* Reviews List */}
           <div className="lg:col-span-2 space-y-4">
             {reviews.map((review, i) => (
-              <div
+              <motion.div
                 key={review.id || i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: Math.min(i * 0.07, 0.4) }}
                 className="p-6 rounded-2xl border border-blue-800/30 bg-blue-950/20 hover:border-orange-500/20 transition-all"
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center">
+                <div className="flex items-start justify-between mb-3 gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center flex-shrink-0">
                       <User className="w-5 h-5 text-orange-400" />
                     </div>
-                    <div>
-                      <p className="text-white font-semibold text-sm">{review.author_name}</p>
+                    <div className="min-w-0">
+                      <p className="text-white font-semibold text-sm truncate">{review.author_name}</p>
                       <p className="text-blue-500 text-xs">{formatDate(review.created_at)}</p>
                     </div>
                   </div>
                   <StarRating rating={review.rating} />
                 </div>
                 <p className="text-blue-300 text-sm leading-relaxed">{review.content}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>

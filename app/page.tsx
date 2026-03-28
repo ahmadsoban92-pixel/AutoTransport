@@ -2,6 +2,7 @@ import { SiteNavbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ScrollProgress } from "@/components/ui/scroll-progress";
 import HomeClient from "./(marketing)/HomeClient";
+import PriceEstimatorChat from "@/components/PriceEstimatorChat";
 
 export default function RootPage() {
   return (
@@ -12,6 +13,7 @@ export default function RootPage() {
         <HomeClient />
       </main>
       <Footer />
+      <PriceEstimatorChat />
     </div>
   );
 }

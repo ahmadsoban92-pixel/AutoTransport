@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
+import { fadeUp } from "@/lib/animations";
 import { Phone, Mail, MapPin, Clock, MessageCircle, Send, CheckCircle } from "lucide-react";
 import { EmailLink } from "@/components/EmailLink";
 import Image from "next/image";
@@ -46,7 +48,7 @@ export default function ContactPage() {
     <div className="min-h-screen bg-[#060d1f] pt-28 pb-16">
       <div className="max-w-5xl mx-auto px-6">
         {/* Header with image */}
-        <div className="relative rounded-3xl overflow-hidden mb-14">
+        <motion.div {...fadeUp(0)} className="relative rounded-3xl overflow-hidden mb-14">
           <Image
             src="/contact-office.png"
             alt="Our Office"
@@ -57,14 +59,19 @@ export default function ContactPage() {
           <div className="img-overlay absolute inset-0 bg-gradient-to-t from-[#060d1f] via-[#060d1f]/60 to-transparent" />
           <div className="absolute bottom-6 left-6 right-6">
             <span className="text-orange-400 text-sm font-semibold uppercase tracking-widest">Get In Touch</span>
-            <h1 className="text-3xl md:text-4xl font-bold text-white mt-1">Contact Us</h1>
-            <p className="text-blue-300 text-base mt-1 max-w-xl">Have a question or need a custom quote? Our team is here to help.</p>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mt-1">Contact Us</h1>
+            <p className="text-blue-300 text-sm sm:text-base mt-1 max-w-xl">Have a question or need a custom quote? Our team is here to help.</p>
           </div>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Contact Cards */}
-          <div className="space-y-4">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="space-y-4">
             <div className="flex items-start gap-4 p-5 rounded-2xl border border-blue-800/30 bg-blue-950/20 hover:border-orange-500/30 transition-all">
               <div className="w-11 h-11 rounded-xl bg-orange-500/20 flex items-center justify-center flex-shrink-0">
                 <Phone className="w-5 h-5 text-orange-400" />
@@ -122,10 +129,15 @@ export default function ContactPage() {
                 <p className="text-base font-semibold text-white">Mon – Sat, 9 AM – 6 PM PKT</p>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Contact Form */}
-          <div className="bg-[#0a1628] border border-blue-800/30 rounded-2xl p-8">
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94], delay: 0.1 }}
+            className="bg-[#0a1628] border border-blue-800/30 rounded-2xl p-6 sm:p-8">
             <h2 className="text-xl font-bold text-white mb-2">Send Us a Message</h2>
             <p className="text-blue-400 text-sm mb-6">Fill in your details and our team will get back to you shortly.</p>
 
@@ -226,9 +238,10 @@ export default function ContactPage() {
                 </EmailLink>
               </div>
             </form>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>
+
   );
 }

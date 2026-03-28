@@ -1,6 +1,7 @@
 import { SiteNavbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ScrollProgress } from "@/components/ui/scroll-progress";
+import PriceEstimatorChat from "@/components/PriceEstimatorChat";
 
 export default function MarketingLayout({
   children,
@@ -13,6 +14,7 @@ export default function MarketingLayout({
       <SiteNavbar />
       <main>{children}</main>
       <Footer />
+      <PriceEstimatorChat />
     </div>
   );
 }

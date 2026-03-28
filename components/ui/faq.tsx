@@ -95,52 +95,48 @@ const FaqItem = React.forwardRef<
       ref={ref}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2, delay: index * 0.1 }}
+      transition={{ duration: 0.2, delay: index * 0.06 }}
       className={cn(
         "group rounded-lg transition-all duration-200 ease-in-out border border-blue-800/30",
         isOpen ? "bg-blue-950/40" : "hover:bg-blue-950/20"
       )}
     >
-      <Button
-        variant="ghost"
+      {/* ── Use a plain <button> so we control the box model fully ── */}
+      <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 sm:px-6 py-4 h-auto justify-between hover:bg-transparent gap-3"
+        className="w-full flex items-center justify-between gap-3 px-4 sm:px-6 py-4 text-left"
       >
         <h3
           className={cn(
-            "flex-1 min-w-0 text-sm sm:text-base font-medium transition-colors duration-200 text-left break-words",
+            "flex-1 min-w-0 text-sm sm:text-base font-medium transition-colors duration-200 break-words leading-snug",
             isOpen ? "text-white" : "text-blue-200"
           )}
         >
           {question}
         </h3>
-        <motion.div
-          animate={{ rotate: isOpen ? 180 : 0, scale: isOpen ? 1.1 : 1 }}
+        <motion.span
+          animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.2 }}
           className={cn(
-            "p-0.5 rounded-full flex-shrink-0 transition-colors duration-200 ml-2",
+            "flex-shrink-0 p-0.5 rounded-full transition-colors duration-200",
             isOpen ? "text-orange-400" : "text-blue-400"
           )}
         >
           <ChevronDown className="h-4 w-4" />
-        </motion.div>
-      </Button>
+        </motion.span>
+      </button>
+
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1, transition: { duration: 0.2, ease: "easeOut" } }}
-            exit={{ height: 0, opacity: 0, transition: { duration: 0.2, ease: "easeIn" } }}
+            exit={{ height: 0, opacity: 0, transition: { duration: 0.15, ease: "easeIn" } }}
+            className="overflow-hidden"
           >
-            <div className="px-6 pb-4 pt-2">
-              <motion.p
-                initial={{ y: -10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -10, opacity: 0 }}
-                className="text-sm text-blue-300 leading-relaxed"
-              >
-                {answer}
-              </motion.p>
+            <div className="px-4 sm:px-6 pb-4 pt-1">
+              <p className="text-sm text-blue-300 leading-relaxed">{answer}</p>
             </div>
           </motion.div>
         )}

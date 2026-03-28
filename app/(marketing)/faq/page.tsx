@@ -1,10 +1,12 @@
 "use client";
 
+import { motion } from "framer-motion";
+import { fadeUp } from "@/lib/animations";
 import { FaqSection } from "@/components/ui/faq";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+
 
 const faqs = [
   {
@@ -65,15 +67,15 @@ export default function FaqPage() {
       {/* Header with image */}
       <section className="py-16 px-6 text-center">
         <div className="max-w-3xl mx-auto">
-          <div className="relative rounded-3xl overflow-hidden mb-8">
+          <motion.div {...fadeUp(0)} className="relative rounded-3xl overflow-hidden mb-8">
             <Image src="/faq-support.png" alt="Customer Support" width={1200} height={300} className="w-full h-44 md:h-56 object-cover" />
             <div className="img-overlay absolute inset-0 bg-gradient-to-t from-[#060d1f] via-[#060d1f]/40 to-transparent" />
-          </div>
-          <span className="text-orange-400 text-sm font-semibold uppercase tracking-widest">Got Questions?</span>
-          <h1 className="text-5xl font-bold text-white mt-3 mb-4">Frequently Asked Questions</h1>
-          <p className="text-blue-300">
+          </motion.div>
+          <motion.span {...fadeUp(0.1)} className="text-orange-400 text-sm font-semibold uppercase tracking-widest block">Got Questions?</motion.span>
+          <motion.h1 {...fadeUp(0.15)} className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mt-3 mb-4">Frequently Asked Questions</motion.h1>
+          <motion.p {...fadeUp(0.2)} className="text-blue-300">
             Everything you need to know about shipping your vehicle with WESAutoTransport.
-          </p>
+          </motion.p>
         </div>
       </section>
 
@@ -93,22 +95,18 @@ export default function FaqPage() {
 
       {/* CTA */}
       <section className="py-16 px-6 text-center bg-[#0a1628] border-t border-blue-900/30 mt-8">
-        <div className="max-w-2xl mx-auto">
+        <motion.div {...fadeUp(0)} className="max-w-2xl mx-auto">
           <h2 className="text-2xl font-bold text-white mb-4">Ready to get started?</h2>
           <p className="text-blue-300 mb-6">Fill out our simple form and get a free quote in seconds.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/get-quote">
-              <Button className="bg-orange-500 hover:bg-orange-600 text-white border-0 h-12 px-8 text-base">
-                Get Your Free Quote →
-              </Button>
+              <Button className="bg-orange-500 hover:bg-orange-600 text-white border-0 h-12 px-8 text-base w-full sm:w-auto">Get Your Free Quote →</Button>
             </Link>
             <a href="https://wa.me/923059846727" target="_blank" rel="noopener noreferrer">
-              <Button className="h-12 px-8 text-base bg-green-600 hover:bg-green-700 text-white border-0">
-                WhatsApp Us
-              </Button>
+              <Button className="h-12 px-8 text-base bg-green-600 hover:bg-green-700 text-white border-0 w-full sm:w-auto">WhatsApp Us</Button>
             </a>
           </div>
-        </div>
+        </motion.div>
       </section>
     </div>
   );

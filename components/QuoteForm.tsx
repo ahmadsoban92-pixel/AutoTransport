@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import { leadSchema, LeadFormData } from "@/lib/validators";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { Loader2, CheckCircle2 } from "lucide-react";
+import { Loader2, CheckCircle2, HelpCircle } from "lucide-react";
 
 const VEHICLE_MAKES = [
   "Acura","Audi","BMW","Buick","Cadillac","Chevrolet","Chrysler","Dodge",
@@ -28,7 +29,7 @@ const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 40 }, (_, i) => currentYear + 1 - i);
 
 interface FormFieldProps {
-  label: string;
+  label: React.ReactNode;
   error?: string;
   required?: boolean;
   children: React.ReactNode;
@@ -141,11 +142,33 @@ export function QuoteForm() {
           Shipping Route
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField label="Pickup ZIP Code" error={errors.origin_zip?.message}>
-            <input {...register("origin_zip")} placeholder="90210" maxLength={5} className={inputClass} />
+          <FormField
+            label={
+              <span className="flex items-center gap-1.5">
+                Pickup ZIP Code
+                <Link href="/zip-code-guide" target="_blank"
+                  className="inline-flex items-center gap-0.5 text-[10px] text-blue-400 hover:text-orange-400 transition-colors font-normal"
+                  title="What is a ZIP code?">
+                  <HelpCircle className="w-3 h-3" /> What's this?
+                </Link>
+              </span>
+            }
+            error={errors.origin_zip?.message}>
+            <input {...register("origin_zip")} placeholder="e.g. 90210" maxLength={5} className={inputClass} />
           </FormField>
-          <FormField label="Delivery ZIP Code" error={errors.destination_zip?.message}>
-            <input {...register("destination_zip")} placeholder="10001" maxLength={5} className={inputClass} />
+          <FormField
+            label={
+              <span className="flex items-center gap-1.5">
+                Delivery ZIP Code
+                <Link href="/zip-code-guide" target="_blank"
+                  className="inline-flex items-center gap-0.5 text-[10px] text-blue-400 hover:text-orange-400 transition-colors font-normal"
+                  title="What is a ZIP code?">
+                  <HelpCircle className="w-3 h-3" /> What's this?
+                </Link>
+              </span>
+            }
+            error={errors.destination_zip?.message}>
+            <input {...register("destination_zip")} placeholder="e.g. 10001" maxLength={5} className={inputClass} />
           </FormField>
         </div>
       </div>
