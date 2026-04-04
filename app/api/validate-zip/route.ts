@@ -29,6 +29,8 @@ export async function GET(request: NextRequest) {
       valid: true,
       city: place?.["place name"] ?? "",
       state: place?.["state abbreviation"] ?? "",
+      lat: parseFloat(place?.["latitude"] ?? "0"),
+      lng: parseFloat(place?.["longitude"] ?? "0"),
     });
   } catch {
     // If API is unreachable, fail open (don't block the user)

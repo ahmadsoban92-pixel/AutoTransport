@@ -303,33 +303,33 @@ export function QuoteForm() {
         <h3 className="text-sm font-semibold text-orange-400 uppercase tracking-wider mb-4">
           Transport Options
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-4">
           <FormField label="Transport Type" error={errors.transport_type?.message}>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
               {TRANSPORT_OPTIONS.map(({ value, sub }) => (
                 <label
                   key={value}
-                  className={`flex items-center gap-2 p-3 rounded-lg border cursor-pointer transition-all ${
+                  className={`flex flex-col gap-1 p-3 rounded-lg border cursor-pointer transition-all ${
                     selectedType === value
                       ? "border-orange-500 bg-orange-500/10"
                       : "border-blue-800/50 bg-blue-950/20 hover:border-orange-500/50"
                   }`}
                 >
-                  <input
-                    {...register("transport_type")}
-                    type="radio"
-                    value={value}
-                    checked={selectedType === value}
-                    onChange={() => {
-                      setSelectedType(value);
-                      setValue("transport_type", value as any);
-                    }}
-                    className="accent-orange-500"
-                  />
-                  <div>
-                    <div className="text-sm font-medium text-white">{value}</div>
-                    <div className="text-xs text-blue-400">{sub}</div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      {...register("transport_type")}
+                      type="radio"
+                      value={value}
+                      checked={selectedType === value}
+                      onChange={() => {
+                        setSelectedType(value);
+                        setValue("transport_type", value as any);
+                      }}
+                      className="accent-orange-500 flex-shrink-0"
+                    />
+                    <div className="text-sm font-medium text-white leading-tight">{value}</div>
                   </div>
+                  <div className="text-xs text-blue-400 pl-5">{sub}</div>
                 </label>
               ))}
             </div>

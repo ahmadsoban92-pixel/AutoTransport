@@ -4,73 +4,71 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, Bot, User, Calculator, HelpCircle } from "lucide-react";
 
-// ─── ZIP Region Matrix ────────────────────────────────────────────────────────
-// US ZIP first-digit maps to a geographic region
-// Distance matrix (miles) between 10 regions (0–9)
-const REGION_CENTERS: Record<number, string> = {
-  0: "Northeast (CT/MA/NY/NJ)",
-  1: "Mid-Atlantic (PA/NY/DE)",
-  2: "Southeast Coast (DC/MD/VA/NC/SC)",
-  3: "South (AL/FL/GA/MS/TN)",
-  4: "Midwest East (IN/KY/MI/OH)",
-  5: "Midwest North (IA/MN/WI/ND/SD)",
-  6: "Midwest Central (IL/MO/KS/NE)",
-  7: "South Central (TX/OK/LA/AR)",
-  8: "Mountain West (CO/AZ/NM/NV/UT)",
-  9: "Pacific (CA/OR/WA/AK/HI)",
-};
-
-// Symmetric distance matrix in hundreds of miles (approximate straight-line)
-const DIST: number[][] = [
-  [100,  150,  450,  1050, 700,  1350, 1200, 1700, 2500, 2800], // 0
-  [150,  100,  300,  900,  500,  1200, 1050, 1550, 2350, 2700], // 1
-  [450,  300,  100,  600,  600,  1300, 1100, 1400, 2200, 2700], // 2
-  [1050, 900,  600,  100,  700,  1200, 900,  900,  1900, 2600], // 3
-  [700,  500,  600,  700,  100,  700,  500,  1100, 1800, 2300], // 4
-  [1350, 1200, 1300, 1200, 700,  100,  400,  900,  1400, 1900], // 5
-  [1200, 1050, 1100, 900,  500,  400,  100,  800,  1300, 1900], // 6
-  [1700, 1550, 1400, 900,  1100, 900,  800,  100,  900,  1500], // 7
-  [2500, 2350, 2200, 1900, 1800, 1400, 1300, 900,  100,  900],  // 8
-  [2800, 2700, 2700, 2600, 2300, 1900, 1900, 1500, 900,  100],  // 9
-];
-
-function estimateDistance(originZip: string, destZip: string): number {
-  const r1 = parseInt(originZip[0]);
-  const r2 = parseInt(destZip[0]);
-  if (isNaN(r1) || isNaN(r2)) return 1000;
-  // Add some variability within a region
-  const base = DIST[r1][r2];
-  const jitter = Math.round((Math.random() * 0.15 - 0.075) * base);
-  return Math.max(100, base + jitter);
+// ─── Haversine great-circle distance ─────────────────────────────────────────
+function haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 3958.8; // Earth radius in miles
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) ** 2;
+  return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
 }
 
-function calcPrice(miles: number, transport: string, condition: string) {
+// ─── Pricing model ────────────────────────────────────────────────────────────
+// Rate-per-mile tiers (road distance ≈ 1.20× straight-line for the US average)
+const ROAD_FACTOR = 1.20;
+
+const TRANSPORT_MULTIPLIERS: Record<string, number> = {
+  "Open":               1.00,
+  "Enclosed":           1.45,
+  "Expedited":          1.30,
+  "Door-to-Door":       1.20,
+  "Snowbird/Seasonal":  0.95,
+};
+
+function calcPrice(straightMiles: number, transport: string, condition: string) {
+  const miles = Math.round(straightMiles * ROAD_FACTOR);
   let ratePerMile: number;
-  if (miles <= 500) ratePerMile = 1.15;
+  if      (miles <= 500)  ratePerMile = 1.15;
   else if (miles <= 1000) ratePerMile = 0.90;
   else if (miles <= 1500) ratePerMile = 0.78;
-  else ratePerMile = 0.65;
+  else                    ratePerMile = 0.65;
 
   let base = Math.max(350, miles * ratePerMile);
-  if (transport === "Enclosed") base *= 1.45;
+  base *= (TRANSPORT_MULTIPLIERS[transport] ?? 1.0);
   if (condition === "Non-Running") base *= 1.15;
 
-  const low = Math.round(base * 0.9 / 25) * 25;
-  const high = Math.round(base * 1.1 / 25) * 25;
+  const low  = Math.round(base * 0.90 / 25) * 25;
+  const high = Math.round(base * 1.10 / 25) * 25;
   return { low, high, miles };
 }
 
 // ─── Chat Step Machine ────────────────────────────────────────────────────────
 type Step = "greet" | "origin" | "dest" | "vehicle" | "transport" | "condition" | "result";
 
-interface ChatMsg {
-  from: "bot" | "user";
-  text: string;
-}
+interface ChatMsg { from: "bot" | "user"; text: string; }
 
-const VEHICLE_TYPES = ["Sedan", "SUV / Truck", "Van / Minivan", "Luxury / Sports", "Motorcycle", "Other"];
-const TRANSPORT_TYPES = ["Open (Standard)", "Enclosed (Premium)"];
+const VEHICLE_TYPES  = ["Sedan", "SUV / Truck", "Van / Minivan", "Luxury / Sports", "Motorcycle", "Other"];
+const TRANSPORT_TYPES = [
+  "Open (Standard)",
+  "Enclosed (Premium)",
+  "Expedited (Rush)",
+  "Door-to-Door",
+  "Snowbird/Seasonal",
+];
 const CONDITION_TYPES = ["Running", "Non-Running"];
+
+// Map display label → internal key
+const TRANSPORT_LABEL_MAP: Record<string, string> = {
+  "Open (Standard)":    "Open",
+  "Enclosed (Premium)": "Enclosed",
+  "Expedited (Rush)":   "Expedited",
+  "Door-to-Door":       "Door-to-Door",
+  "Snowbird/Seasonal":  "Snowbird/Seasonal",
+};
 
 export default function PriceEstimatorChat() {
   const [open, setOpen] = useState(false);
@@ -79,18 +77,30 @@ export default function PriceEstimatorChat() {
     { from: "bot", text: "👋 Hi! I can give you a rough price estimate for shipping your vehicle. Ready to start?" },
   ]);
   const [input, setInput] = useState("");
-  const [data, setData] = useState({ origin: "", dest: "", vehicle: "", transport: "", condition: "" });
+  const [data, setData] = useState({
+    origin: "", dest: "", originLat: 0, originLng: 0, destLat: 0, destLng: 0,
+    vehicle: "", transport: "", condition: "",
+  });
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [msgs]);
 
-  const addBot = (text: string) =>
-    setMsgs((prev) => [...prev, { from: "bot", text }]);
-  const addUser = (text: string) =>
-    setMsgs((prev) => [...prev, { from: "user", text }]);
+  const addBot  = (text: string) => setMsgs((p) => [...p, { from: "bot",  text }]);
+  const addUser = (text: string) => setMsgs((p) => [...p, { from: "user", text }]);
 
+  // ── ZIP validation (returns lat/lng for accurate distance) ────────────────
+  const validateZip = async (zip: string): Promise<{ valid: boolean; city?: string; state?: string; lat?: number; lng?: number }> => {
+    try {
+      const res = await fetch(`/api/validate-zip?zip=${zip}`);
+      return await res.json();
+    } catch {
+      return { valid: true };
+    }
+  };
+
+  // ── Text input handler (origin / dest ZIPs) ───────────────────────────────
   const handleUserText = async () => {
     const val = input.trim();
     if (!val) return;
@@ -99,20 +109,11 @@ export default function PriceEstimatorChat() {
     await processText(val);
   };
 
-  const validateZip = async (zip: string): Promise<{ valid: boolean; city?: string; state?: string }> => {
-    try {
-      const res = await fetch(`/api/validate-zip?zip=${zip}`);
-      const data = await res.json();
-      return data;
-    } catch {
-      return { valid: true }; // fail open
-    }
-  };
-
   const processText = async (val: string) => {
     if (step === "greet") {
       setStep("origin");
       setTimeout(() => addBot("Great! What's the **origin ZIP code** (where we're shipping from)?"), 400);
+
     } else if (step === "origin") {
       if (!/^\d{5}$/.test(val)) {
         setTimeout(() => addBot("Please enter a valid 5-digit US ZIP code for the origin."), 400);
@@ -120,13 +121,14 @@ export default function PriceEstimatorChat() {
       }
       const check = await validateZip(val);
       if (!check.valid) {
-        setTimeout(() => addBot(`❌ **${val}** doesn't appear to be a valid US ZIP code. Please double-check and try again.`), 400);
+        setTimeout(() => addBot(`❌ **${val}** doesn't appear to be a valid US ZIP code. Please try again.`), 400);
         return;
       }
       const location = check.city ? `${check.city}, ${check.state}` : val;
-      setData((d) => ({ ...d, origin: val }));
+      setData((d) => ({ ...d, origin: val, originLat: check.lat ?? 0, originLng: check.lng ?? 0 }));
       setStep("dest");
       setTimeout(() => addBot(`✓ **${location}** — got it!\n\nNow what's the **destination ZIP code** (where we're shipping to)?`), 400);
+
     } else if (step === "dest") {
       if (!/^\d{5}$/.test(val)) {
         setTimeout(() => addBot("Please enter a valid 5-digit US ZIP code for the destination."), 400);
@@ -134,67 +136,72 @@ export default function PriceEstimatorChat() {
       }
       const check = await validateZip(val);
       if (!check.valid) {
-        setTimeout(() => addBot(`❌ **${val}** doesn't appear to be a valid US ZIP code. Please double-check and try again.`), 400);
+        setTimeout(() => addBot(`❌ **${val}** doesn't appear to be a valid US ZIP code. Please try again.`), 400);
         return;
       }
       const location = check.city ? `${check.city}, ${check.state}` : val;
-      setData((d) => ({ ...d, dest: val }));
+      setData((d) => ({ ...d, dest: val, destLat: check.lat ?? 0, destLng: check.lng ?? 0 }));
       setStep("vehicle");
       setTimeout(() => addBot(`✓ **${location}** — perfect!\n\nWhat type of vehicle are you shipping? (choose below)`), 400);
     }
   };
 
+  // ── Chip selection handler ────────────────────────────────────────────────
   const handleChip = (label: string) => {
     addUser(label);
+
     if (step === "greet") {
       setStep("origin");
       setTimeout(() => addBot("Great! What's the **origin ZIP code** (where we're shipping from)?"), 400);
+
     } else if (step === "vehicle") {
       setData((d) => ({ ...d, vehicle: label }));
       setStep("transport");
-      setTimeout(() => addBot("Which transport type?"), 400);
+      setTimeout(() => addBot("Which transport type would you like?\n\n• **Open** — most popular & affordable\n• **Enclosed** — premium protection\n• **Expedited** — rush pickup & delivery\n• **Door-to-Door** — maximum convenience\n• **Snowbird/Seasonal** — seasonal routes"), 400);
+
     } else if (step === "transport") {
-      const isEnclosed = label.startsWith("Enclosed");
-      setData((d) => ({ ...d, transport: isEnclosed ? "Enclosed" : "Open" }));
+      const transportKey = TRANSPORT_LABEL_MAP[label] ?? "Open";
+      setData((d) => ({ ...d, transport: transportKey }));
       setStep("condition");
       setTimeout(() => addBot("Is the vehicle **running** (can it be driven onto the carrier)?"), 400);
+
     } else if (step === "condition") {
-      const isNonRunning = label === "Non-Running";
-      const newData = { ...data, condition: isNonRunning ? "Non-Running" : "Running" };
+      const newData = { ...data, condition: label };
       setData(newData);
       setStep("result");
-      // Calculate estimate
+
       setTimeout(() => {
-        const miles = estimateDistance(newData.origin, newData.dest);
-        const { low, high } = calcPrice(miles, newData.transport, newData.condition);
+        // Use Haversine for accurate distance
+        const straightMiles = haversine(newData.originLat, newData.originLng, newData.destLat, newData.destLng);
+        const { low, high, miles } = calcPrice(straightMiles, newData.transport, newData.condition);
         addBot(
           `📦 Here's your estimate:\n\n` +
           `🚗 Vehicle: ${newData.vehicle}\n` +
           `📍 Route: ${newData.origin} → ${newData.dest}\n` +
-          `📏 Est. Distance: ~${miles} miles\n` +
+          `📏 Est. Distance: ~${miles.toLocaleString()} miles (driving)\n` +
           `🚛 Transport: ${newData.transport}\n\n` +
           `💰 **Estimated Cost: $${low.toLocaleString()} – $${high.toLocaleString()}**\n\n` +
           `_This is a rough estimate. Final pricing depends on vehicle size, exact route, and carrier availability._\n\nWant an exact quote?`
         );
       }, 600);
+
     } else if (step === "result") {
       if (label === "Get Exact Quote") {
         window.location.href = "/get-quote";
       } else {
-        // Reset
         setStep("greet");
-        setData({ origin: "", dest: "", vehicle: "", transport: "", condition: "" });
+        setData({ origin: "", dest: "", originLat: 0, originLng: 0, destLat: 0, destLng: 0, vehicle: "", transport: "", condition: "" });
         setMsgs([{ from: "bot", text: "Let's start a new estimate! Ready?" }]);
       }
     }
   };
 
   const chips: string[] = (() => {
-    if (step === "greet") return ["Yes, let's go!"];
-    if (step === "vehicle") return VEHICLE_TYPES;
+    if (step === "greet")     return ["Yes, let's go!"];
+    if (step === "vehicle")   return VEHICLE_TYPES;
     if (step === "transport") return TRANSPORT_TYPES;
     if (step === "condition") return CONDITION_TYPES;
-    if (step === "result") return ["Get Exact Quote", "Start Over"];
+    if (step === "result")    return ["Get Exact Quote", "Start Over"];
     return [];
   })();
 
@@ -277,7 +284,7 @@ export default function PriceEstimatorChat() {
               </div>
             )}
 
-            {/* Text Input */}
+            {/* Text Input (ZIP entry) */}
             {showInput && (
               <div className="px-3 pb-3">
                 <a

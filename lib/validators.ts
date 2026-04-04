@@ -5,8 +5,19 @@ export const leadSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   phone: z
     .string()
-    .min(10, "Phone number must be at least 10 digits")
-    .regex(/^[\d\s\-\+\(\)]+$/, "Please enter a valid phone number"),
+    .trim()
+    .transform((val) => val.replace(/\s+/g, " ").trim())
+    .refine(
+      (val) => {
+        // Strip all non-digit chars except leading + to count real digits
+        const digits = val.replace(/\D/g, "");
+        // Must be 7–15 digits (local to full international)
+        if (digits.length < 7 || digits.length > 15) return false;
+        // Allow common phone chars: digits, spaces, dashes, dots, parens, plus
+        return /^[+\d][\d\s\-.()+]{6,}$/.test(val);
+      },
+      { message: "Please enter a valid phone number (e.g. (555) 555-5555 or +1 800 555 0100)" }
+    ),
   origin_zip: z
     .string()
     .length(5, "ZIP code must be 5 digits")

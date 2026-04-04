@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { AnimatedHero } from "@/components/ui/animated-hero";
 import { FeaturesSectionWithHoverEffects } from "@/components/ui/feature-section-with-hover-effects";
-import { Globe } from "@/components/ui/globe";
+import { GlobeWithUSAMap } from "@/components/GlobeWithUSAMap";
 import { TypewriterEffectSmooth } from "@/components/ui/typewriter-effect";
 import { BauhausCard } from "@/components/ui/bauhaus-card";
 import { Button } from "@/components/ui/button";
@@ -295,10 +295,8 @@ export default function HomeClient() {
                 </Button>
               </Link>
             </motion.div>
-            {/* Globe — light shader works on any background */}
-            <div className="relative h-[500px]">
-              <Globe />
-            </div>
+            {/* Globe → USA Map transition on click */}
+            <GlobeWithUSAMap />
           </div>
         </div>
       </section>
