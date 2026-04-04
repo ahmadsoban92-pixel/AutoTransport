@@ -55,6 +55,7 @@ export default function ContactPage() {
             width={1200}
             height={400}
             className="w-full h-48 md:h-64 object-cover"
+            quality={90}
           />
           <div className="img-overlay absolute inset-0 bg-gradient-to-t from-[#060d1f] via-[#060d1f]/60 to-transparent" />
           <div className="absolute bottom-6 left-6 right-6">

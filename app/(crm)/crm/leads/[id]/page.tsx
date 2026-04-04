@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, User, Car, MapPin, Clock, Save, Loader2,
   Phone, Mail, MessageCircle, UserCheck, Lock, X, Send,
+  DollarSign, Image as ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -204,6 +205,10 @@ export default function LeadDetailPage() {
   const [claiming, setClaiming] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
   const [showEmailModal, setShowEmailModal] = useState(false);
+  // Price-prompt modal state
+  const [showPriceModal, setShowPriceModal] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<LeadStatus | null>(null);
+  const [priceInput, setPriceInput] = useState("");
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -247,16 +252,36 @@ export default function LeadDetailPage() {
 
   const handleStatusUpdate = async () => {
     if (!lead || newStatus === lead.status) return;
+    // If moving away from New and no price set → prompt for price first
+    if (newStatus !== "New" && !lead.finalized_price) {
+      setPendingStatus(newStatus);
+      setPriceInput("");
+      setShowPriceModal(true);
+      return;
+    }
+    await doStatusUpdate(newStatus, lead.finalized_price ?? null);
+  };
+
+  const doStatusUpdate = async (status: LeadStatus, price: number | null) => {
     setSaving(true);
-    const { error } = await supabase.from("leads").update({ status: newStatus }).eq("id", id);
+    const updatePayload: Record<string, unknown> = { status };
+    if (price !== null) updatePayload.finalized_price = price;
+    const { error } = await supabase.from("leads").update(updatePayload).eq("id", id);
     if (!error) {
-      setLead((prev) => prev ? { ...prev, status: newStatus } : prev);
+      setLead((prev) => prev ? { ...prev, status, finalized_price: price ?? prev.finalized_price } : prev);
       setSaveMessage("✓ Status updated");
       setTimeout(() => setSaveMessage(""), 3000);
     } else {
       setSaveMessage("✗ Failed: " + error.message);
     }
     setSaving(false);
+    setShowPriceModal(false);
+  };
+
+  const handlePriceConfirm = async () => {
+    const price = parseFloat(priceInput);
+    if (isNaN(price) || price <= 0) return;
+    await doStatusUpdate(pendingStatus!, price);
   };
 
   if (loading) {
@@ -279,6 +304,61 @@ export default function LeadDetailPage() {
   return (
     <>
       {showEmailModal && <EmailComposeModal lead={lead} onClose={() => setShowEmailModal(false)} />}
+
+      {/* Price prompt modal */}
+      <AnimatePresence>
+        {showPriceModal && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+            onClick={() => setShowPriceModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.96, y: 16 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96 }}
+              className="bg-[#0a1628] border border-orange-500/40 rounded-2xl p-6 w-full max-w-sm shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center">
+                  <DollarSign className="w-5 h-5 text-orange-400" />
+                </div>
+                <div>
+                  <h2 className="text-white font-bold">Set Finalized Price</h2>
+                  <p className="text-blue-400 text-xs mt-0.5">Required before changing status to <span className="text-orange-300 font-semibold">{pendingStatus}</span></p>
+                </div>
+              </div>
+              <p className="text-blue-300 text-sm mb-4">Enter the price agreed with the client. This will be saved permanently with the lead.</p>
+              <div className="relative mb-4">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-orange-400 font-bold">$</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="25"
+                  placeholder="e.g. 1250"
+                  value={priceInput}
+                  onChange={(e) => setPriceInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handlePriceConfirm()}
+                  className="w-full pl-8 pr-4 py-3 rounded-xl bg-blue-950/60 border border-blue-700/40 text-white text-lg font-bold focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  autoFocus
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowPriceModal(false)}
+                  className="flex-1 py-2.5 rounded-xl border border-blue-700/40 text-blue-300 hover:bg-blue-900/40 text-sm transition-colors"
+                >Cancel</button>
+                <button
+                  onClick={handlePriceConfirm}
+                  disabled={!priceInput || parseFloat(priceInput) <= 0 || saving}
+                  className="flex-1 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm transition-colors disabled:opacity-40"
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Confirm & Save"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="p-6 md:p-8 max-w-4xl">
         <button onClick={() => router.back()} className="flex items-center gap-2 text-blue-400 hover:text-white text-sm mb-6">
@@ -327,7 +407,28 @@ export default function LeadDetailPage() {
               <InfoRow label="Model" value={lead.vehicle_model} />
               <InfoRow label="Condition" value={lead.vehicle_condition ?? "—"} />
               <InfoRow label="Transport Type" value={lead.transport_type} />
+              {lead.finalized_price && (
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 py-2 border-b border-blue-900/20">
+                  <span className="text-xs font-semibold text-blue-500 uppercase tracking-wider w-40 flex-shrink-0">Finalized Price</span>
+                  <span className="text-green-400 font-bold text-base">${lead.finalized_price.toLocaleString()}</span>
+                </div>
+              )}
             </motion.div>
+
+            {/* Car image — shown if uploaded */}
+            {lead.car_image_url && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="bg-[#0a1628] border border-blue-800/30 rounded-2xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center"><ImageIcon className="w-4 h-4 text-purple-400" /></div>
+                  <h2 className="text-white font-semibold">Vehicle Photo</h2>
+                </div>
+                <img
+                  src={lead.car_image_url}
+                  alt="Customer vehicle"
+                  className="w-full rounded-xl object-cover max-h-64 border border-blue-800/20"
+                />
+              </motion.div>
+            )}
 
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-[#0a1628] border border-blue-800/30 rounded-2xl p-6">
               <div className="flex items-center gap-3 mb-4">
@@ -399,6 +500,12 @@ export default function LeadDetailPage() {
                     </button>
                   ))}
                 </div>
+                {lead.finalized_price && (
+                  <div className="mb-4 px-4 py-3 rounded-xl bg-green-500/10 border border-green-500/20">
+                    <span className="text-xs text-green-400 font-semibold uppercase tracking-wider">Agreed Price</span>
+                    <div className="text-green-300 font-bold text-xl mt-0.5">${lead.finalized_price.toLocaleString()}</div>
+                  </div>
+                )}
                 <Button onClick={handleStatusUpdate} disabled={saving || newStatus === lead.status} className="w-full bg-orange-500 hover:bg-orange-600 text-white border-0 disabled:opacity-40">
                   {saving ? <><Loader2 className="mr-2 w-4 h-4 animate-spin" /> Saving...</> : <><Save className="mr-2 w-4 h-4" /> Save Status</>}
                 </Button>

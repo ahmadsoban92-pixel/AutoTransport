@@ -10,6 +10,14 @@ import { Button } from "@/components/ui/button";
 
 const STORAGE_KEY = "crm_dismissed_inquiries";
 
+type InquiryStatus = "Unhandled" | "Picked Up" | "Solved";
+const INQUIRY_STATUSES: InquiryStatus[] = ["Unhandled", "Picked Up", "Solved"];
+const STATUS_STYLES: Record<InquiryStatus, string> = {
+  Unhandled: "bg-orange-500/20 text-orange-400 border-orange-500/30",
+  "Picked Up": "bg-blue-500/20 text-blue-300 border-blue-500/30",
+  Solved: "bg-green-500/20 text-green-400 border-green-500/30",
+};
+
 interface Inquiry {
   id: string;
   name: string;
@@ -17,6 +25,7 @@ interface Inquiry {
   email: string | null;
   message: string;
   created_at: string;
+  status?: InquiryStatus;
 }
 
 // ─── Email Compose Modal (same pattern as lead detail page) ───────────────────
@@ -137,9 +146,11 @@ export default function InquiriesPage() {
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<InquiryStatus | "All">("All");
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const [errorMsg, setErrorMsg] = useState("");
   const [composing, setComposing] = useState<Inquiry | null>(null);
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
   // Load dismissed IDs from localStorage on mount
   useEffect(() => {
@@ -176,6 +187,23 @@ export default function InquiriesPage() {
       });
   }, []);
 
+  const cycleStatus = async (inq: Inquiry) => {
+    const current: InquiryStatus = inq.status ?? "Unhandled";
+    const next = INQUIRY_STATUSES[(INQUIRY_STATUSES.indexOf(current) + 1) % INQUIRY_STATUSES.length];
+    setUpdatingStatus(inq.id);
+    try {
+      const res = await fetch(`/api/contact/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: inq.id, status: next }),
+      });
+      if (res.ok) {
+        setInquiries((prev) => prev.map((i) => i.id === inq.id ? { ...i, status: next } : i));
+      }
+    } catch {}
+    setUpdatingStatus(null);
+  };
+
   // Normalize phone for WA
   const normalizePhone = (raw: string) => {
     const digits = raw.replace(/\D/g, "");
@@ -191,12 +219,14 @@ export default function InquiriesPage() {
 
   const filtered = inquiries.filter((inq) => {
     const q = search.toLowerCase();
-    return (
+    const matchesSearch = (
       inq.name.toLowerCase().includes(q) ||
       inq.phone.includes(q) ||
       (inq.email ?? "").toLowerCase().includes(q) ||
       inq.message.toLowerCase().includes(q)
     );
+    const matchesStatus = statusFilter === "All" || (inq.status ?? "Unhandled") === statusFilter;
+    return matchesSearch && matchesStatus;
   });
 
   const visible = filtered.filter((inq) => !dismissed.has(inq.id));
@@ -227,15 +257,25 @@ export default function InquiriesPage() {
         )}
       </div>
 
-      {/* Search */}
-      <div className="mb-6">
+      {/* Search + Status filter */}
+      <div className="mb-6 flex flex-col sm:flex-row gap-3">
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by name, phone, email, or message..."
-          className="w-full max-w-md px-4 py-2.5 rounded-lg bg-blue-950/40 border border-blue-800/40 text-white text-sm placeholder:text-blue-500 focus:outline-none focus:ring-2 focus:ring-orange-500/40"
+          className="flex-1 px-4 py-2.5 rounded-lg bg-blue-950/40 border border-blue-800/40 text-white text-sm placeholder:text-blue-500 focus:outline-none focus:ring-2 focus:ring-orange-500/40"
         />
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as InquiryStatus | "All")}
+          className="rounded-lg bg-blue-950/40 border border-blue-800/40 text-sm text-white px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-500/40"
+        >
+          <option value="All" className="bg-blue-950">All Statuses</option>
+          {INQUIRY_STATUSES.map((s) => (
+            <option key={s} value={s} className="bg-blue-950">{s}</option>
+          ))}
+        </select>
       </div>
 
       {loading && (
@@ -282,6 +322,15 @@ export default function InquiriesPage() {
                         {new Date(inq.created_at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}
                       </div>
                     </div>
+                    {/* Status badge — click to cycle */}
+                    <button
+                      onClick={() => cycleStatus(inq)}
+                      disabled={updatingStatus === inq.id}
+                      className={`ml-auto text-xs px-3 py-1 rounded-full border font-semibold transition-all hover:opacity-80 ${STATUS_STYLES[inq.status ?? "Unhandled"]} ${updatingStatus === inq.id ? "opacity-50" : ""}`}
+                      title="Click to change status"
+                    >
+                      {updatingStatus === inq.id ? "..." : (inq.status ?? "Unhandled")}
+                    </button>
                   </div>
                   <p className="text-blue-200 text-sm leading-relaxed mb-4 pl-12">{inq.message}</p>
                   <div className="flex flex-wrap gap-3 pl-12">

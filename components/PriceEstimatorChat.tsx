@@ -91,15 +91,25 @@ export default function PriceEstimatorChat() {
   const addUser = (text: string) =>
     setMsgs((prev) => [...prev, { from: "user", text }]);
 
-  const handleUserText = () => {
+  const handleUserText = async () => {
     const val = input.trim();
     if (!val) return;
     setInput("");
     addUser(val);
-    processText(val);
+    await processText(val);
   };
 
-  const processText = (val: string) => {
+  const validateZip = async (zip: string): Promise<{ valid: boolean; city?: string; state?: string }> => {
+    try {
+      const res = await fetch(`/api/validate-zip?zip=${zip}`);
+      const data = await res.json();
+      return data;
+    } catch {
+      return { valid: true }; // fail open
+    }
+  };
+
+  const processText = async (val: string) => {
     if (step === "greet") {
       setStep("origin");
       setTimeout(() => addBot("Great! What's the **origin ZIP code** (where we're shipping from)?"), 400);
@@ -108,17 +118,29 @@ export default function PriceEstimatorChat() {
         setTimeout(() => addBot("Please enter a valid 5-digit US ZIP code for the origin."), 400);
         return;
       }
+      const check = await validateZip(val);
+      if (!check.valid) {
+        setTimeout(() => addBot(`❌ **${val}** doesn't appear to be a valid US ZIP code. Please double-check and try again.`), 400);
+        return;
+      }
+      const location = check.city ? `${check.city}, ${check.state}` : val;
       setData((d) => ({ ...d, origin: val }));
       setStep("dest");
-      setTimeout(() => addBot(`Got it! And what's the **destination ZIP code** (where we're shipping to)?`), 400);
+      setTimeout(() => addBot(`✓ **${location}** — got it!\n\nNow what's the **destination ZIP code** (where we're shipping to)?`), 400);
     } else if (step === "dest") {
       if (!/^\d{5}$/.test(val)) {
         setTimeout(() => addBot("Please enter a valid 5-digit US ZIP code for the destination."), 400);
         return;
       }
+      const check = await validateZip(val);
+      if (!check.valid) {
+        setTimeout(() => addBot(`❌ **${val}** doesn't appear to be a valid US ZIP code. Please double-check and try again.`), 400);
+        return;
+      }
+      const location = check.city ? `${check.city}, ${check.state}` : val;
       setData((d) => ({ ...d, dest: val }));
       setStep("vehicle");
-      setTimeout(() => addBot("What type of vehicle are you shipping? (choose below)"), 400);
+      setTimeout(() => addBot(`✓ **${location}** — perfect!\n\nWhat type of vehicle are you shipping? (choose below)`), 400);
     }
   };
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { leadSchema, LeadFormData } from "@/lib/validators";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { Loader2, CheckCircle2, HelpCircle } from "lucide-react";
+import { Loader2, CheckCircle2, HelpCircle, Upload, X, CheckCircle } from "lucide-react";
 
 const VEHICLE_MAKES = [
   "Acura","Audi","BMW","Buick","Cadillac","Chevrolet","Chrysler","Dodge",
@@ -60,13 +60,23 @@ const selectClass =
 export function QuoteForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  // Pre-select transport type and vehicle condition from URL params (set by Services page)
   const preselectedType = searchParams.get("type") || "";
   const preselectedCondition = searchParams.get("condition") || "";
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string>(preselectedType);
+
+  // ZIP validation state
+  const [originZipInfo, setOriginZipInfo] = useState<{ valid: boolean; city?: string; state?: string; checked?: boolean } | null>(null);
+  const [destZipInfo, setDestZipInfo] = useState<{ valid: boolean; city?: string; state?: string; checked?: boolean } | null>(null);
+  const [checkingZip, setCheckingZip] = useState<"origin" | "dest" | null>(null);
+
+  // Car image state
+  const [carImageFile, setCarImageFile] = useState<File | null>(null);
+  const [carImagePreview, setCarImagePreview] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
@@ -81,14 +91,64 @@ export function QuoteForm() {
     },
   });
 
+  const validateZip = async (zip: string, field: "origin" | "dest") => {
+    if (!/^\d{5}$/.test(zip)) return;
+    setCheckingZip(field);
+    try {
+      const res = await fetch(`/api/validate-zip?zip=${zip}`);
+      const data = await res.json();
+      if (field === "origin") setOriginZipInfo({ ...data, checked: true });
+      else setDestZipInfo({ ...data, checked: true });
+    } catch {
+      if (field === "origin") setOriginZipInfo({ valid: true, checked: true });
+      else setDestZipInfo({ valid: true, checked: true });
+    }
+    setCheckingZip(null);
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image must be under 5MB");
+      return;
+    }
+    setCarImageFile(file);
+    setCarImagePreview(URL.createObjectURL(file));
+  };
+
   const onSubmit = async (data: LeadFormData) => {
+    // Block if ZIP invalid
+    if (originZipInfo?.checked && !originZipInfo.valid) {
+      setSubmitError("Please enter a valid pickup ZIP code.");
+      return;
+    }
+    if (destZipInfo?.checked && !destZipInfo.valid) {
+      setSubmitError("Please enter a valid delivery ZIP code.");
+      return;
+    }
     setIsSubmitting(true);
     setSubmitError(null);
     try {
+      // Upload car image if present
+      let carImageUrl: string | null = null;
+      if (carImageFile) {
+        setUploadingImage(true);
+        const formData = new FormData();
+        formData.append("file", carImageFile);
+        const uploadRes = await fetch("/api/upload-car-image", { method: "POST", body: formData });
+        if (uploadRes.ok) {
+          const uploadData = await uploadRes.json();
+          carImageUrl = uploadData.url ?? null;
+        }
+        setUploadingImage(false);
+      }
+
       const payload = {
         ...data,
         vehicle_year: parseInt(data.vehicle_year),
         created_at: new Date().toISOString(),
+        ...(carImageUrl ? { car_image_url: carImageUrl } : {}),
       };
 
       const res = await fetch("/api/leads", {
@@ -103,10 +163,11 @@ export function QuoteForm() {
       }
 
       router.push("/thank-you");
-    } catch (err: any) {
-      setSubmitError(err.message || "Something went wrong. Please try again.");
+    } catch (err: unknown) {
+      setSubmitError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
+      setUploadingImage(false);
     }
   };
 
@@ -154,7 +215,25 @@ export function QuoteForm() {
               </span>
             }
             error={errors.origin_zip?.message}>
-            <input {...register("origin_zip")} placeholder="e.g. 90210" maxLength={5} className={inputClass} />
+            <div className="relative">
+              <input
+                {...register("origin_zip")}
+                placeholder="e.g. 90210"
+                maxLength={5}
+                className={inputClass}
+                onBlur={(e) => validateZip(e.target.value, "origin")}
+              />
+              {checkingZip === "origin" && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2"><Loader2 className="w-3.5 h-3.5 animate-spin text-blue-400" /></div>
+              )}
+            </div>
+            {originZipInfo?.checked && (
+              <p className={`text-xs mt-1 flex items-center gap-1 ${originZipInfo.valid ? "text-green-400" : "text-red-400"}`}>
+                {originZipInfo.valid
+                  ? <><CheckCircle className="w-3 h-3" /> {originZipInfo.city ? `${originZipInfo.city}, ${originZipInfo.state}` : "Valid ZIP"}</>
+                  : <>⚠ ZIP code not found in US postal system</>}
+              </p>
+            )}
           </FormField>
           <FormField
             label={
@@ -168,7 +247,25 @@ export function QuoteForm() {
               </span>
             }
             error={errors.destination_zip?.message}>
-            <input {...register("destination_zip")} placeholder="e.g. 10001" maxLength={5} className={inputClass} />
+            <div className="relative">
+              <input
+                {...register("destination_zip")}
+                placeholder="e.g. 10001"
+                maxLength={5}
+                className={inputClass}
+                onBlur={(e) => validateZip(e.target.value, "dest")}
+              />
+              {checkingZip === "dest" && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2"><Loader2 className="w-3.5 h-3.5 animate-spin text-blue-400" /></div>
+              )}
+            </div>
+            {destZipInfo?.checked && (
+              <p className={`text-xs mt-1 flex items-center gap-1 ${destZipInfo.valid ? "text-green-400" : "text-red-400"}`}>
+                {destZipInfo.valid
+                  ? <><CheckCircle className="w-3 h-3" /> {destZipInfo.city ? `${destZipInfo.city}, ${destZipInfo.state}` : "Valid ZIP"}</>
+                  : <>⚠ ZIP code not found in US postal system</>}
+              </p>
+            )}
           </FormField>
         </div>
       </div>
@@ -263,11 +360,51 @@ export function QuoteForm() {
         </div>
       </div>
 
+      {/* Section: Vehicle Photo (Optional) */}
+      <div>
+        <h3 className="text-sm font-semibold text-orange-400 uppercase tracking-wider mb-4">
+          Vehicle Photo <span className="text-blue-500 font-normal normal-case">(Optional)</span>
+        </h3>
+        <div
+          onClick={() => imageInputRef.current?.click()}
+          className="relative border-2 border-dashed border-blue-800/50 hover:border-orange-500/50 rounded-xl p-6 cursor-pointer transition-all text-center group"
+        >
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={handleImageChange}
+          />
+          {carImagePreview ? (
+            <div className="relative">
+              <img src={carImagePreview} alt="Car preview" className="mx-auto max-h-48 rounded-lg object-contain" />
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setCarImageFile(null); setCarImagePreview(null); }}
+                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-500/80 text-white flex items-center justify-center hover:bg-red-600 transition-colors"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+              <p className="text-xs text-blue-400 mt-2">{carImageFile?.name} — click to change</p>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-2 text-blue-400 group-hover:text-orange-400 transition-colors">
+              <Upload className="w-8 h-8" />
+              <p className="text-sm font-medium">Upload a photo of your vehicle</p>
+              <p className="text-xs text-blue-600">JPG, PNG or WebP · Max 5MB</p>
+            </div>
+          )}
+        </div>
+      </div>
+
       {submitError && (
         <div className="p-4 rounded-lg bg-red-900/20 border border-red-800/50 text-red-400 text-sm">
           {submitError}
         </div>
       )}
+
+
 
       <Button
         type="submit"

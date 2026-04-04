@@ -37,7 +37,7 @@ export default function AboutPage() {
       <section className="py-20 px-6 text-center">
         <div className="max-w-4xl mx-auto">
           <motion.div {...fadeUp(0)} className="relative rounded-3xl overflow-hidden mb-10">
-            <Image src="/about-team.png" alt="Our Team" width={1200} height={400} className="w-full h-56 md:h-72 object-cover" />
+            <Image src="/about-team.png" alt="Our Team" width={1200} height={400} quality={90} className="w-full h-56 md:h-72 object-cover" />
             <div className="img-overlay absolute inset-0 bg-gradient-to-t from-[#060d1f] via-[#060d1f]/40 to-transparent" />
             <div className="absolute bottom-6 left-6 right-6 text-left">
               <div className="w-14 h-14 rounded-2xl bg-orange-500/20 flex items-center justify-center mb-3">

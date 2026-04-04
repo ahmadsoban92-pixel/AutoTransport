@@ -23,4 +23,7 @@ export interface Lead {
   created_at: string;
   assigned_broker_id?: string | null;
   assigned_broker_email?: string | null;
+  car_image_url?: string | null;
+  finalized_price?: number | null;
 }
+

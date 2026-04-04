@@ -19,7 +19,9 @@ const apiLeadSchema = z.object({
     "Snowbird/Seasonal",
   ] as const),
   vehicle_condition: z.enum(["Running", "Non-Running"] as const),
+  car_image_url: z.string().url().optional().nullable(),
 });
+
 
 export async function POST(request: NextRequest) {
   try {
@@ -61,7 +63,8 @@ export async function POST(request: NextRequest) {
         vehicle_model: data.vehicle_model,
         vehicle_year: String(data.vehicle_year),
         transport_type: data.transport_type,
-        // vehicle_condition: add this back once the column exists in Supabase
+        vehicle_condition: data.vehicle_condition,
+        car_image_url: data.car_image_url ?? null,
         status: "New",
       })
       .select("id")

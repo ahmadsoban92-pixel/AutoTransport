@@ -68,7 +68,7 @@ export default function FaqPage() {
       <section className="py-16 px-6 text-center">
         <div className="max-w-3xl mx-auto">
           <motion.div {...fadeUp(0)} className="relative rounded-3xl overflow-hidden mb-8">
-            <Image src="/faq-support.png" alt="Customer Support" width={1200} height={300} className="w-full h-44 md:h-56 object-cover" />
+            <Image src="/faq-support.png" alt="Customer Support" width={1200} height={300} quality={90} className="w-full h-44 md:h-56 object-cover" />
             <div className="img-overlay absolute inset-0 bg-gradient-to-t from-[#060d1f] via-[#060d1f]/40 to-transparent" />
           </motion.div>
           <motion.span {...fadeUp(0.1)} className="text-orange-400 text-sm font-semibold uppercase tracking-widest block">Got Questions?</motion.span>
