@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabaseAdmin";
 import { leadSchema } from "@/lib/validators";
 import { z } from "zod";
+import { rateLimit, getClientIp } from "@/lib/rateLimit";
+
 
 // Extend the front-end schema for the API context:
 // vehicle_year comes in as a string from the form; the API co-erce it to a number
@@ -11,6 +13,15 @@ const apiLeadSchema = leadSchema.extend({
 });
 
 export async function POST(request: NextRequest) {
+  // Rate-limit: 5 quote submissions per IP per minute
+  const ip = getClientIp(request);
+  if (!rateLimit(ip, 5, 60_000)) {
+    return NextResponse.json(
+      { error: "Too many requests. Please wait a minute before trying again." },
+      { status: 429 }
+    );
+  }
+
   let supabase;
   try {
     supabase = getAdminClient();

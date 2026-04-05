@@ -1,160 +1,32 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import { MessageCircle, Phone, Clock, User, CheckCircle2, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
-import {
-  MessageCircle, Phone, Mail, Clock, User, CheckCircle2,
-  Trash2, X, Send, Loader2,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-
+import type { Inquiry, InquiryStatus } from "@/types/lead";
+import { EmailComposeModal } from "@/components/EmailComposeModal";
 
 const STORAGE_KEY = "crm_dismissed_inquiries";
 
-type InquiryStatus = "Unhandled" | "Picked Up" | "Solved";
 const INQUIRY_STATUSES: InquiryStatus[] = ["Unhandled", "Picked Up", "Solved"];
+
 const STATUS_STYLES: Record<InquiryStatus, string> = {
-  Unhandled: "bg-orange-500/20 text-orange-400 border-orange-500/30",
+  Unhandled:   "bg-orange-500/20 text-orange-400 border-orange-500/30",
   "Picked Up": "bg-blue-500/20 text-blue-300 border-blue-500/30",
-  Solved: "bg-green-500/20 text-green-400 border-green-500/30",
+  Solved:      "bg-green-500/20 text-green-400 border-green-500/30",
 };
 
-interface Inquiry {
-  id: string;
-  name: string;
-  phone: string;
-  email: string | null;
-  message: string;
-  created_at: string;
-  status?: InquiryStatus;
-}
-
-// ─── Email Compose Modal (same pattern as lead detail page) ───────────────────
-function EmailComposeModal({
-  inquiry,
-  onClose,
-}: {
-  inquiry: Inquiry;
-  onClose: () => void;
-}) {
-  const [subject, setSubject] = useState("Following up on your WESAutoTransport inquiry");
-  const [body, setBody] = useState(
-    `Hi ${inquiry.name},\n\nThank you for reaching out to WESAutoTransport.\n\nWe received your inquiry and our team will be happy to assist you. Please let us know if you have any questions about our services.\n\nBest regards,\nWESAutoTransport Team`
-  );
-  const [sending, setSending] = useState(false);
-  const [sent, setSent] = useState(false);
-  const [err, setErr] = useState("");
-
-  const handleSend = async () => {
-    if (!inquiry.email) return;
-    setSending(true);
-    setErr("");
-    try {
-      const res = await fetch("/api/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: inquiry.email,
-          toName: inquiry.name,
-          subject,
-          html: body.replace(/\n/g, "<br/>"),
-          text: body,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to send");
-      setSent(true);
-      setTimeout(onClose, 1800);
-    } catch (e: unknown) {
-      setErr(e instanceof Error ? e.message : "Failed to send email.");
-    }
-    setSending(false);
-  };
-
-  return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-        onClick={onClose}
-      >
-        <motion.div
-          initial={{ scale: 0.96, opacity: 0, y: 16 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.96, opacity: 0, y: 16 }}
-          className="bg-[#0a1628] border border-blue-800/40 rounded-2xl p-6 w-full max-w-lg shadow-2xl"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex items-center justify-between mb-5">
-            <div>
-              <h3 className="text-white font-semibold">Compose Email</h3>
-              <p className="text-blue-400 text-xs mt-0.5">To: {inquiry.name} &lt;{inquiry.email}&gt;</p>
-            </div>
-            <button onClick={onClose} className="text-blue-500 hover:text-white transition-colors">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {sent ? (
-            <div className="flex flex-col items-center py-8 text-center">
-              <CheckCircle2 className="w-10 h-10 text-green-400 mb-3" />
-              <p className="text-white font-medium">Email sent successfully!</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div>
-                <label className="text-xs text-blue-400 uppercase tracking-wider mb-1 block">Subject</label>
-                <input
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  className="w-full bg-blue-950/50 border border-blue-800/40 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/40"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-blue-400 uppercase tracking-wider mb-1 block">Message</label>
-                <textarea
-                  value={body}
-                  onChange={(e) => setBody(e.target.value)}
-                  rows={8}
-                  className="w-full bg-blue-950/50 border border-blue-800/40 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/40 resize-none"
-                />
-              </div>
-              {err && <p className="text-red-400 text-xs">{err}</p>}
-              <div className="flex justify-end gap-3 pt-1">
-                <Button variant="ghost" onClick={onClose} className="text-blue-400 hover:text-white">
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleSend}
-                  disabled={sending || !subject || !body}
-                  className="bg-orange-500 hover:bg-orange-600 text-white border-0 disabled:opacity-40"
-                >
-                  {sending ? <><Loader2 className="mr-2 w-4 h-4 animate-spin" />Sending...</> : <><Send className="mr-2 w-4 h-4" />Send Email</>}
-                </Button>
-              </div>
-            </div>
-          )}
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
-  );
-}
-// ─────────────────────────────────────────────────────────────────────────────
-
 export default function InquiriesPage() {
-  const [inquiries, setInquiries] = useState<Inquiry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<InquiryStatus | "All">("All");
-  const [dismissed, setDismissed] = useState<Set<string>>(new Set());
-  const [errorMsg, setErrorMsg] = useState("");
-  const [composing, setComposing] = useState<Inquiry | null>(null);
+  const [inquiries,      setInquiries]      = useState<Inquiry[]>([]);
+  const [loading,        setLoading]        = useState(true);
+  const [search,         setSearch]         = useState("");
+  const [statusFilter,   setStatusFilter]   = useState<InquiryStatus | "All">("All");
+  const [dismissed,      setDismissed]      = useState<Set<string>>(new Set());
+  const [errorMsg,       setErrorMsg]       = useState("");
+  const [composing,      setComposing]      = useState<Inquiry | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
-  // Load dismissed IDs from localStorage on mount
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -178,8 +50,8 @@ export default function InquiriesPage() {
   useEffect(() => {
     async function loadInquiries() {
       try {
-        const { data: session } = await supabase.auth.getSession();
-        const token = session?.session?.access_token ?? "";
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData?.session?.access_token ?? "";
         const r = await fetch("/api/contact", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -197,12 +69,14 @@ export default function InquiriesPage() {
 
   const cycleStatus = async (inq: Inquiry) => {
     const current: InquiryStatus = inq.status ?? "Unhandled";
-    const next = INQUIRY_STATUSES[(INQUIRY_STATUSES.indexOf(current) + 1) % INQUIRY_STATUSES.length];
+    const next = INQUIRY_STATUSES[
+      (INQUIRY_STATUSES.indexOf(current) + 1) % INQUIRY_STATUSES.length
+    ];
     setUpdatingStatus(inq.id);
     try {
-      const { data: session } = await supabase.auth.getSession();
-      const token = session?.session?.access_token ?? "";
-      const res = await fetch(`/api/contact/status`, {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token ?? "";
+      const res = await fetch("/api/contact/status", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -211,13 +85,14 @@ export default function InquiriesPage() {
         body: JSON.stringify({ id: inq.id, status: next }),
       });
       if (res.ok) {
-        setInquiries((prev) => prev.map((i) => i.id === inq.id ? { ...i, status: next } : i));
+        setInquiries((prev) =>
+          prev.map((i) => (i.id === inq.id ? { ...i, status: next } : i))
+        );
       }
     } catch {}
     setUpdatingStatus(null);
   };
 
-  // Normalize phone for WA
   const normalizePhone = (raw: string) => {
     const digits = raw.replace(/\D/g, "");
     if (digits.startsWith("92")) return digits;
@@ -225,31 +100,36 @@ export default function InquiriesPage() {
     return digits;
   };
 
-  const waMsg = (inq: Inquiry) =>
+  const waUrl = (inq: Inquiry) =>
     `https://wa.me/${normalizePhone(inq.phone)}?text=${encodeURIComponent(
       `Hi ${inq.name}, thank you for contacting WESAutoTransport! How can we help you today?`
     )}`;
 
   const filtered = inquiries.filter((inq) => {
     const q = search.toLowerCase();
-    const matchesSearch = (
+    const matchesSearch =
       inq.name.toLowerCase().includes(q) ||
       inq.phone.includes(q) ||
       (inq.email ?? "").toLowerCase().includes(q) ||
-      inq.message.toLowerCase().includes(q)
-    );
-    const matchesStatus = statusFilter === "All" || (inq.status ?? "Unhandled") === statusFilter;
+      inq.message.toLowerCase().includes(q);
+    const matchesStatus =
+      statusFilter === "All" || (inq.status ?? "Unhandled") === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  const visible = filtered.filter((inq) => !dismissed.has(inq.id));
+  const visible        = filtered.filter((inq) => !dismissed.has(inq.id));
   const dismissedCount = filtered.filter((inq) => dismissed.has(inq.id)).length;
 
   return (
     <div className="p-6 md:p-8">
-      {/* Email compose modal */}
-      {composing && (
-        <EmailComposeModal inquiry={composing} onClose={() => setComposing(null)} />
+      {composing && composing.email && (
+        <EmailComposeModal
+          to={composing.email}
+          toName={composing.name}
+          defaultSubject="Following up on your WESAutoTransport inquiry"
+          defaultBody={`Hi ${composing.name},\n\nThank you for reaching out to WESAutoTransport.\n\nWe received your inquiry and our team will be happy to assist you. Please let us know if you have any questions about our services.\n\nBest regards,\nWESAutoTransport Team`}
+          onClose={() => setComposing(null)}
+        />
       )}
 
       <div className="mb-8 flex items-start justify-between">
@@ -270,7 +150,6 @@ export default function InquiriesPage() {
         )}
       </div>
 
-      {/* Search + Status filter */}
       <div className="mb-6 flex flex-col sm:flex-row gap-3">
         <input
           type="text"
@@ -293,12 +172,16 @@ export default function InquiriesPage() {
 
       {loading && (
         <div className="space-y-3">
-          {[1, 2, 3].map((i) => <div key={i} className="h-32 rounded-2xl bg-blue-900/20 animate-pulse" />)}
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-32 rounded-2xl bg-blue-900/20 animate-pulse" />
+          ))}
         </div>
       )}
 
       {errorMsg && (
-        <div className="p-4 rounded-xl bg-red-900/20 border border-red-800/40 text-red-400 text-sm mb-6">{errorMsg}</div>
+        <div className="p-4 rounded-xl bg-red-900/20 border border-red-800/40 text-red-400 text-sm mb-6">
+          {errorMsg}
+        </div>
       )}
 
       {!loading && !errorMsg && visible.length === 0 && (
@@ -306,7 +189,11 @@ export default function InquiriesPage() {
           <CheckCircle2 className="w-12 h-12 text-blue-800 mb-4" />
           <h2 className="text-white font-semibold">No inquiries found</h2>
           <p className="text-blue-400 text-sm mt-2">
-            {search ? "Try a different search term." : dismissedCount > 0 ? "All inquiries dismissed." : "No contact form submissions yet."}
+            {search
+              ? "Try a different search term."
+              : dismissedCount > 0
+              ? "All inquiries dismissed."
+              : "No contact form submissions yet."}
           </p>
         </div>
       )}
@@ -318,7 +205,6 @@ export default function InquiriesPage() {
               key={inq.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, x: 20 }}
               transition={{ delay: i * 0.04 }}
               className="p-6 rounded-2xl border border-blue-800/30 bg-[#0a1628] hover:border-orange-500/20 transition-all"
             >
@@ -332,22 +218,34 @@ export default function InquiriesPage() {
                       <span className="text-white font-semibold">{inq.name}</span>
                       <div className="flex items-center gap-1 text-xs text-blue-500 mt-0.5">
                         <Clock className="w-3 h-3" />
-                        {new Date(inq.created_at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}
+                        {new Date(inq.created_at).toLocaleString("en-US", {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })}
                       </div>
                     </div>
-                    {/* Status badge — click to cycle */}
                     <button
                       onClick={() => cycleStatus(inq)}
                       disabled={updatingStatus === inq.id}
-                      className={`ml-auto text-xs px-3 py-1 rounded-full border font-semibold transition-all hover:opacity-80 ${STATUS_STYLES[inq.status ?? "Unhandled"]} ${updatingStatus === inq.id ? "opacity-50" : ""}`}
+                      aria-label={`Change status (currently ${inq.status ?? "Unhandled"})`}
                       title="Click to change status"
+                      className={`ml-auto text-xs px-3 py-1 rounded-full border font-semibold transition-all hover:opacity-80 ${
+                        STATUS_STYLES[inq.status ?? "Unhandled"]
+                      } ${updatingStatus === inq.id ? "opacity-50" : ""}`}
                     >
                       {updatingStatus === inq.id ? "..." : (inq.status ?? "Unhandled")}
                     </button>
                   </div>
-                  <p className="text-blue-200 text-sm leading-relaxed mb-4 pl-12">{inq.message}</p>
+
+                  <p className="text-blue-200 text-sm leading-relaxed mb-4 pl-12">
+                    {inq.message}
+                  </p>
+
                   <div className="flex flex-wrap gap-3 pl-12">
-                    <a href={`tel:${inq.phone}`} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-blue-600/20 text-blue-300 hover:bg-blue-600/40 transition-colors">
+                    <a
+                      href={`tel:${inq.phone}`}
+                      className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-blue-600/20 text-blue-300 hover:bg-blue-600/40 transition-colors"
+                    >
                       <Phone className="w-3 h-3" /> {inq.phone}
                     </a>
                     {inq.email && (
@@ -355,16 +253,23 @@ export default function InquiriesPage() {
                         onClick={() => setComposing(inq)}
                         className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 transition-colors"
                       >
-                        <Mail className="w-3 h-3" /> {inq.email}
+                        {inq.email}
                       </button>
                     )}
-                    <a href={waMsg(inq)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors">
+                    <a
+                      href={waUrl(inq)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors"
+                    >
                       <MessageCircle className="w-3 h-3" /> WhatsApp
                     </a>
                   </div>
                 </div>
+
                 <button
                   onClick={() => dismissInquiry(inq.id)}
+                  aria-label={`Dismiss inquiry from ${inq.name}`}
                   title="Dismiss inquiry"
                   className="flex items-center gap-1 text-xs text-blue-700 hover:text-red-400 transition-colors shrink-0 mt-1"
                 >
@@ -379,9 +284,10 @@ export default function InquiriesPage() {
       {!loading && (
         <div className="mt-4 text-xs text-blue-700 text-right">
           {visible.length} of {inquiries.length} inquiries shown
-          {dismissedCount > 0 && ` · ${dismissedCount} dismissed`}
+          {dismissedCount > 0 && ` - ${dismissedCount} dismissed`}
         </div>
       )}
     </div>
   );
 }
+

@@ -7,10 +7,11 @@ import { Lead, LeadStatus } from "@/types/lead";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, User, Car, MapPin, Clock, Save, Loader2,
-  Phone, Mail, MessageCircle, UserCheck, Lock, X, Send,
+  Phone, Mail, MessageCircle, UserCheck, Lock,
   DollarSign, Image as ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { EmailComposeModal } from "@/components/EmailComposeModal";
 
 import { LEAD_STATUS_COLORS, ALL_LEAD_STATUSES, LEAD_STATUS_DOT_COLORS } from "@/lib/constants";
 
@@ -23,134 +24,6 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-// ─── Email Compose Modal ─────────────────────────────────────────────────────
-function EmailComposeModal({
-  lead,
-  onClose,
-}: {
-  lead: Lead;
-  onClose: () => void;
-}) {
-  const defaultSubject = `Your Auto Transport Quote – WESAutoTransport`;
-  const defaultBody = `Hi ${lead.name},
-
-Thank you for requesting a quote with WESAutoTransport. We have reviewed your request:
-
-• Vehicle: ${lead.vehicle_year} ${lead.vehicle_make} ${lead.vehicle_model}
-• Route: ${lead.origin_zip} → ${lead.destination_zip}
-• Transport Type: ${lead.transport_type}
-
-Your dedicated broker will be in touch shortly with your personalized quote.
-
-Best regards,
-WESAutoTransport Team`;
-
-  const [subject, setSubject] = useState(defaultSubject);
-  const [body, setBody] = useState(defaultBody);
-  const [sending, setSending] = useState(false);
-  const [result, setResult] = useState("");
-
-  const handleSend = async () => {
-    setSending(true);
-    setResult("");
-    const htmlBody = body.split("\n").map(l => l ? `<p style="margin:4px 0">${l}</p>` : "<br/>").join("");
-    const res = await fetch("/api/send-email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        to: lead.email,
-        toName: lead.name,
-        subject,
-        html: `<div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;">
-          <h2 style="color:#f97316;margin-top:0;">WESAutoTransport</h2>
-          ${htmlBody}
-        </div>`,
-        text: body,
-      }),
-    });
-    const d = await res.json();
-    setResult(res.ok ? "✓ Email sent successfully!" : `✗ ${d.error}`);
-    setSending(false);
-    if (res.ok) setTimeout(onClose, 1500);
-  };
-
-  return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-        onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-      >
-        <motion.div
-          initial={{ opacity: 0, scale: 0.96, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.96 }}
-          className="w-full max-w-2xl bg-[#0a1628] border border-blue-800/40 rounded-2xl shadow-2xl overflow-hidden"
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-blue-800/30">
-            <div className="flex items-center gap-3">
-              <Mail className="w-5 h-5 text-orange-400" />
-              <span className="text-white font-semibold">Compose Email</span>
-            </div>
-            <button onClick={onClose} className="text-blue-400 hover:text-white transition-colors">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          <div className="p-6 space-y-4">
-            {/* To (read-only) */}
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-blue-500 w-12 text-right shrink-0">To</span>
-              <div className="flex-1 px-3 py-2 rounded-lg bg-blue-950/40 border border-blue-800/30 text-blue-200 text-sm">
-                {lead.name} &lt;{lead.email}&gt;
-              </div>
-            </div>
-
-            {/* Subject */}
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-blue-500 w-12 text-right shrink-0">Subject</span>
-              <input
-                type="text"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                className="flex-1 px-3 py-2 rounded-lg bg-blue-950/40 border border-blue-800/40 text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/40"
-              />
-            </div>
-
-            {/* Body */}
-            <textarea
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              rows={10}
-              className="w-full px-4 py-3 rounded-xl bg-blue-950/40 border border-blue-800/40 text-white text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-orange-500/40 resize-y"
-            />
-
-            {result && (
-              <p className={`text-sm ${result.startsWith("✓") ? "text-green-400" : "text-red-400"}`}>{result}</p>
-            )}
-
-            <div className="flex justify-end gap-3 pt-2">
-              <Button variant="outline" onClick={onClose} className="border-blue-700 text-blue-300 hover:bg-blue-900/40">
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSend}
-                disabled={sending || !subject || !body}
-                className="bg-orange-500 hover:bg-orange-600 text-white border-0 disabled:opacity-40"
-              >
-                {sending ? <><Loader2 className="mr-2 w-4 h-4 animate-spin" /> Sending...</> : <><Send className="mr-2 w-4 h-4" /> Send Email</>}
-              </Button>
-            </div>
-          </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
-  );
-}
-// ─────────────────────────────────────────────────────────────────────────────
 
 // Helper: send a pre-built email via Resend
 async function sendAutoEmail(lead: Lead): Promise<void> {
@@ -296,7 +169,26 @@ export default function LeadDetailPage() {
 
   return (
     <>
-      {showEmailModal && <EmailComposeModal lead={lead} onClose={() => setShowEmailModal(false)} />}
+      {showEmailModal && (
+        <EmailComposeModal
+          to={lead.email}
+          toName={lead.name}
+          defaultSubject="Your Auto Transport Quote – WESAutoTransport"
+          defaultBody={`Hi ${lead.name},
+
+Thank you for requesting a quote with WESAutoTransport. We have reviewed your request:
+
+• Vehicle: ${lead.vehicle_year} ${lead.vehicle_make} ${lead.vehicle_model}
+• Route: ${lead.origin_zip} → ${lead.destination_zip}
+• Transport Type: ${lead.transport_type}
+
+Your dedicated broker will be in touch shortly with your personalized quote.
+
+Best regards,
+WESAutoTransport Team`}
+          onClose={() => setShowEmailModal(false)}
+        />
+      )}
 
       {/* Price prompt modal */}
       <AnimatePresence>

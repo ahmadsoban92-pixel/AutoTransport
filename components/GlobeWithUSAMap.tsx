@@ -10,8 +10,8 @@ import dynamic from "next/dynamic";
 const USALeafletMap = dynamic(() => import("./USALeafletMap"), {
   ssr: false,
   loading: () => (
-    <div className="flex-1 flex items-center justify-center bg-[#0a1628]">
-      <div className="text-blue-400 text-sm animate-pulse">Loading map…</div>
+    <div className="flex-1 flex items-center justify-center bg-[#e8eaed]">
+      <div className="text-gray-500 text-sm animate-pulse">Loading map...</div>
     </div>
   ),
 });
@@ -37,20 +37,20 @@ function MapModal({ onClose }: { onClose: () => void }) {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.92, opacity: 0 }}
         transition={{ type: "spring", damping: 24, stiffness: 260 }}
-        className="relative w-full max-w-5xl flex flex-col rounded-2xl overflow-hidden border border-blue-700/40 shadow-2xl bg-[#0a1628]"
+        className="relative w-full max-w-5xl flex flex-col rounded-2xl overflow-hidden border border-gray-200 shadow-2xl bg-white"
         style={{ height: "min(85vh, 700px)" }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 bg-gradient-to-r from-[#0a1628] to-[#0f1f3d] border-b border-blue-800/40 flex-shrink-0">
+        <div className="flex items-center justify-between px-5 py-3 bg-white border-b border-gray-200 flex-shrink-0">
           <div>
-            <p className="text-white font-bold text-base">WESAutoTransport — Nationwide Coverage</p>
-            <p className="text-blue-400 text-xs">All 50 states · 50,000+ verified carriers · 2,000+ cities served</p>
+            <p className="text-gray-900 font-bold text-base">WESAutoTransport — Nationwide Coverage</p>
+            <p className="text-gray-500 text-xs">All 50 states · 50,000+ verified carriers · 2,000+ cities served</p>
           </div>
           <button
             onClick={onClose}
             aria-label="Close map"
-            className="flex items-center gap-1.5 text-white/60 hover:text-white text-sm transition-colors ml-4"
+            className="flex items-center gap-1.5 text-gray-400 hover:text-gray-700 text-sm transition-colors ml-4"
           >
             <X className="w-4 h-4" /> Close
           </button>

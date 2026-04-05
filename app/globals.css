@@ -303,3 +303,33 @@ input[type="password"]::-ms-clear {
 input[type="password"] {
   -moz-appearance: none;
 }
+
+/* ===== LEAFLET — Google Maps style overrides ===== */
+/* Clean white popup card, no coloured tip */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.06) !important;
+  padding: 0 !important;
+  background: #fff !important;
+  color: #202124 !important;
+  font-family: 'Roboto', 'Google Sans', Arial, sans-serif !important;
+}
+.leaflet-popup-content {
+  margin: 12px 16px !important;
+}
+/* Hide the default blue arrow tip */
+.leaflet-popup-tip-container {
+  display: none !important;
+}
+/* Remove default close button so our popup looks cleaner */
+.leaflet-popup-close-button {
+  color: #5f6368 !important;
+  font-size: 18px !important;
+  top: 6px !important;
+  right: 8px !important;
+}
+/* Attribution bar — keep it unobtrusive */
+.leaflet-control-attribution {
+  font-size: 10px !important;
+  background: rgba(255,255,255,0.85) !important;
+}

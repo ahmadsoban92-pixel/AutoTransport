@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabaseAdmin";
 import { requireApiAuth } from "@/lib/requireApiAuth";
+import { rateLimit, getClientIp } from "@/lib/rateLimit";
+
 
 // GET /api/contact — list all contact inquiries (CRM broker use only)
 export async function GET(request: NextRequest) {
@@ -21,6 +23,15 @@ export async function GET(request: NextRequest) {
 
 // POST /api/contact — save a contact inquiry (public contact form — no auth required)
 export async function POST(request: NextRequest) {
+  // Rate-limit: 5 contact submissions per IP per minute
+  const ip = getClientIp(request);
+  if (!rateLimit(ip, 5, 60_000)) {
+    return NextResponse.json(
+      { error: "Too many requests. Please wait before submitting again." },
+      { status: 429 }
+    );
+  }
+
   try {
     const body = await request.json();
     const { name, phone, email, message } = body;

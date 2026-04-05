@@ -1,64 +1,92 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { Lead, LeadStatus } from "@/types/lead";
-import { Search, Filter, ArrowUpDown, Eye, User2 } from "lucide-react";
-
+import { Search, Filter, ArrowUpDown, Eye, User2, ChevronLeft, ChevronRight } from "lucide-react";
 import { LEAD_STATUS_COLORS, ALL_LEAD_STATUSES } from "@/lib/constants";
 
+const PAGE_SIZE = 25;
+
 interface Props {
-  basePath?: string;
-  brokerId?: string;   // if set, filter to this broker's leads only
-  detailCtx?: string;  // ctx param to append to detail links (claim|mine|view)
-  showBrokerCol?: boolean; // show assigned broker column
+  basePath?:      string;
+  brokerId?:      string;   // if set, filter to this broker's leads only
+  detailCtx?:     string;   // ctx param to append to detail links (claim|mine|view)
+  showBrokerCol?: boolean;  // show assigned broker column
 }
 
-export function LeadTable({ basePath = "/leads", brokerId, detailCtx = "view", showBrokerCol = false }: Props) {
+export function LeadTable({
+  basePath     = "/leads",
+  brokerId,
+  detailCtx    = "view",
+  showBrokerCol = false,
+}: Props) {
   const router = useRouter();
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<LeadStatus | "All">("All");
-  const [sortDesc, setSortDesc] = useState(true);
 
-  useEffect(() => {
-    async function fetchLeads() {
-      let query = supabase.from("leads").select("*").order("created_at", { ascending: false });
-      if (brokerId) {
-        query = query.eq("assigned_broker_id", brokerId);
+  const [leads,        setLeads]        = useState<Lead[]>([]);
+  const [totalCount,   setTotalCount]   = useState(0);
+  const [loading,      setLoading]      = useState(true);
+  const [search,       setSearch]       = useState("");
+  const [statusFilter, setStatusFilter] = useState<LeadStatus | "All">("All");
+  const [sortDesc,     setSortDesc]     = useState(true);
+  const [page,         setPage]         = useState(0);
+
+  // Reset to page 0 whenever filters/sort change
+  useEffect(() => { setPage(0); }, [search, statusFilter, sortDesc, brokerId]);
+
+  const fetchLeads = useCallback(async () => {
+    setLoading(true);
+    try {
+      let query = supabase
+        .from("leads")
+        .select("*", { count: "exact" })
+        .order("created_at", { ascending: !sortDesc })
+        .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+
+      if (brokerId)      query = query.eq("assigned_broker_id", brokerId);
+      if (statusFilter !== "All") query = query.eq("status", statusFilter);
+      if (search.trim()) {
+        // Supabase doesn't support multi-column OR with ilike in one call cleanly,
+        // so we filter client-side on the already-paginated smaller result set.
+        // For large DBs, replace with a DB full-text search index later.
       }
-      const { data, error } = await query;
-      if (!error && data) setLeads(data as Lead[]);
+
+      const { data, error, count } = await query;
+      if (!error && data) {
+        setLeads(data as Lead[]);
+        setTotalCount(count ?? 0);
+      }
+    } finally {
       setLoading(false);
     }
-    fetchLeads();
-  }, [brokerId]);
+  }, [brokerId, statusFilter, sortDesc, page]);
 
-  const filtered = leads
-    .filter((l) => {
-      const q = search.toLowerCase();
-      return (
-        l.name.toLowerCase().includes(q) ||
-        l.email.toLowerCase().includes(q) ||
-        l.phone.includes(q) ||
-        l.origin_zip.includes(q) ||
-        l.destination_zip.includes(q)
-      );
-    })
-    .filter((l) => statusFilter === "All" || l.status === statusFilter)
-    .sort((a, b) => {
-      const ta = new Date(a.created_at).getTime();
-      const tb = new Date(b.created_at).getTime();
-      return sortDesc ? tb - ta : ta - tb;
-    });
+  useEffect(() => { fetchLeads(); }, [fetchLeads]);
 
-  const goToDetail = (id: string) => router.push(`${basePath}/${id}?ctx=${detailCtx}`);
+  // Client-side search filter applied on the already-fetched page
+  const filtered = search.trim()
+    ? leads.filter((l) => {
+        const q = search.toLowerCase();
+        return (
+          l.name.toLowerCase().includes(q) ||
+          l.email.toLowerCase().includes(q) ||
+          l.phone.includes(q) ||
+          l.origin_zip.includes(q) ||
+          l.destination_zip.includes(q)
+        );
+      })
+    : leads;
+
+  const totalPages  = Math.ceil(totalCount / PAGE_SIZE);
+  const hasPrev     = page > 0;
+  const hasNext     = page < totalPages - 1;
+
+  const goToDetail  = (id: string) => router.push(`${basePath}/${id}?ctx=${detailCtx}`);
 
   return (
     <div>
-      {/* Controls */}
+      {/* ── Controls ─────────────────────────────────────────────── */}
       <div className="flex flex-col md:flex-row gap-3 mb-6">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500" />
@@ -84,6 +112,7 @@ export function LeadTable({ basePath = "/leads", brokerId, detailCtx = "view", s
           </select>
           <button
             onClick={() => setSortDesc(!sortDesc)}
+            aria-label={`Sort by ${sortDesc ? "oldest" : "newest"} first`}
             className="flex items-center gap-1.5 px-3 py-2.5 rounded-lg bg-blue-950/40 border border-blue-800/40 text-sm text-blue-300 hover:text-white hover:border-orange-500/40 transition-all"
           >
             <ArrowUpDown className="w-4 h-4" />
@@ -92,7 +121,7 @@ export function LeadTable({ basePath = "/leads", brokerId, detailCtx = "view", s
         </div>
       </div>
 
-      {/* Table */}
+      {/* ── Table ────────────────────────────────────────────────── */}
       <div className="rounded-2xl border border-blue-800/30 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -111,9 +140,9 @@ export function LeadTable({ basePath = "/leads", brokerId, detailCtx = "view", s
             </thead>
             <tbody className="divide-y divide-blue-800/20">
               {loading ? (
-                [...Array(5)].map((_, i) => (
+                [...Array(PAGE_SIZE > 10 ? 8 : PAGE_SIZE)].map((_, i) => (
                   <tr key={i} className="animate-pulse">
-                    {[...Array(8)].map((_, j) => (
+                    {[...Array(showBrokerCol ? 9 : 8)].map((_, j) => (
                       <td key={j} className="px-4 py-4">
                         <div className="h-4 bg-blue-900/40 rounded w-full" />
                       </td>
@@ -122,8 +151,9 @@ export function LeadTable({ basePath = "/leads", brokerId, detailCtx = "view", s
                 ))
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-4 py-12 text-center text-blue-500">
-                    No leads found. {search || statusFilter !== "All" ? "Try adjusting your filters." : ""}
+                  <td colSpan={showBrokerCol ? 9 : 8} className="px-4 py-12 text-center text-blue-500">
+                    No leads found.{" "}
+                    {search || statusFilter !== "All" ? "Try adjusting your filters." : ""}
                   </td>
                 </tr>
               ) : (
@@ -140,7 +170,7 @@ export function LeadTable({ basePath = "/leads", brokerId, detailCtx = "view", s
                     <td className="px-4 py-4 text-blue-300 hidden md:table-cell">{lead.phone}</td>
                     <td className="px-4 py-4 hidden sm:table-cell">
                       <span className="text-blue-200">{lead.origin_zip}</span>
-                      <span className="text-blue-500 mx-1">→</span>
+                      <span className="text-blue-500 mx-1">to</span>
                       <span className="text-blue-200">{lead.destination_zip}</span>
                     </td>
                     <td className="px-4 py-4 text-blue-300 hidden lg:table-cell">
@@ -188,9 +218,38 @@ export function LeadTable({ basePath = "/leads", brokerId, detailCtx = "view", s
         </div>
       </div>
 
+      {/* ── Footer: count + pagination ───────────────────────────── */}
       {!loading && (
-        <div className="mt-4 text-xs text-blue-500 text-right">
-          Showing {filtered.length} of {leads.length} leads
+        <div className="mt-4 flex items-center justify-between">
+          <span className="text-xs text-blue-500">
+            {totalCount === 0
+              ? "No leads"
+              : `Showing ${page * PAGE_SIZE + 1}–${Math.min((page + 1) * PAGE_SIZE, totalCount)} of ${totalCount} leads`}
+          </span>
+
+          {totalPages > 1 && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPage((p) => p - 1)}
+                disabled={!hasPrev}
+                aria-label="Previous page"
+                className="p-1.5 rounded-lg bg-blue-950/40 border border-blue-800/40 text-blue-400 hover:text-white hover:border-orange-500/40 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <span className="text-xs text-blue-400">
+                Page {page + 1} of {totalPages}
+              </span>
+              <button
+                onClick={() => setPage((p) => p + 1)}
+                disabled={!hasNext}
+                aria-label="Next page"
+                className="p-1.5 rounded-lg bg-blue-950/40 border border-blue-800/40 text-blue-400 hover:text-white hover:border-orange-500/40 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
