@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/lib/supabaseClient";
 import {
   MessageCircle, Phone, Mail, Clock, User, CheckCircle2,
   Trash2, X, Send, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
 
 const STORAGE_KEY = "crm_dismissed_inquiries";
 
@@ -174,17 +176,23 @@ export default function InquiriesPage() {
   };
 
   useEffect(() => {
-    fetch("/api/contact")
-      .then((r) => r.json())
-      .then(({ inquiries: data, error }) => {
-        if (error) setErrorMsg(error);
-        else if (data) setInquiries(data as Inquiry[]);
-        setLoading(false);
-      })
-      .catch(() => {
+    async function loadInquiries() {
+      try {
+        const { data: session } = await supabase.auth.getSession();
+        const token = session?.session?.access_token ?? "";
+        const r = await fetch("/api/contact", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const json = await r.json();
+        if (json.error) setErrorMsg(json.error);
+        else if (json.inquiries) setInquiries(json.inquiries as Inquiry[]);
+      } catch {
         setErrorMsg("Failed to load inquiries.");
+      } finally {
         setLoading(false);
-      });
+      }
+    }
+    loadInquiries();
   }, []);
 
   const cycleStatus = async (inq: Inquiry) => {
@@ -192,9 +200,14 @@ export default function InquiriesPage() {
     const next = INQUIRY_STATUSES[(INQUIRY_STATUSES.indexOf(current) + 1) % INQUIRY_STATUSES.length];
     setUpdatingStatus(inq.id);
     try {
+      const { data: session } = await supabase.auth.getSession();
+      const token = session?.session?.access_token ?? "";
       const res = await fetch(`/api/contact/status`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ id: inq.id, status: next }),
       });
       if (res.ok) {

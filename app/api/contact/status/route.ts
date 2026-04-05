@@ -1,23 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { getAdminClient } from "@/lib/supabaseAdmin";
+import { requireApiAuth } from "@/lib/requireApiAuth";
 
 const VALID_STATUSES = ["Unhandled", "Picked Up", "Solved"] as const;
+type InquiryStatus = (typeof VALID_STATUSES)[number];
 
-// PATCH /api/contact/status — update inquiry status from the CRM
+// PATCH /api/contact/status — update inquiry status (CRM use only)
 export async function PATCH(request: NextRequest) {
-  try {
-    const { id, status } = await request.json();
+  const auth = await requireApiAuth(request);
+  if (!auth.ok) return auth.response;
 
-    if (!id || !status || !VALID_STATUSES.includes(status)) {
+  try {
+    const { id, status } = await request.json() as { id?: string; status?: string };
+
+    if (!id || !status || !VALID_STATUSES.includes(status as InquiryStatus)) {
       return NextResponse.json({ error: "Invalid id or status" }, { status: 400 });
     }
 
-    const { error } = await supabaseAdmin
+    const supabase = getAdminClient();
+    const { error } = await supabase
       .from("contact_inquiries")
       .update({ status })
       .eq("id", id);

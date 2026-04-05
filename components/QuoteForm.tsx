@@ -9,6 +9,7 @@ import { leadSchema, LeadFormData } from "@/lib/validators";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Loader2, CheckCircle2, HelpCircle, Upload, X, CheckCircle } from "lucide-react";
+import type { TransportType } from "@/types/lead";
 
 const VEHICLE_MAKES = [
   "Acura","Audi","BMW","Buick","Cadillac","Chevrolet","Chrysler","Dodge",
@@ -27,6 +28,16 @@ const TRANSPORT_OPTIONS = [
 
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 40 }, (_, i) => currentYear + 1 - i);
+
+// Validated set of transport types — used to guard URL param injection
+const VALID_TRANSPORT_TYPES: TransportType[] = [
+  "Open", "Enclosed", "Expedited", "Door-to-Door", "Snowbird/Seasonal",
+];
+function toTransportType(val: string): TransportType | undefined {
+  return VALID_TRANSPORT_TYPES.includes(val as TransportType)
+    ? (val as TransportType)
+    : undefined;
+}
 
 interface FormFieldProps {
   label: React.ReactNode;
@@ -86,7 +97,7 @@ export function QuoteForm() {
   } = useForm<LeadFormData>({
     resolver: zodResolver(leadSchema),
     defaultValues: {
-      transport_type: (preselectedType as any) || undefined,
+      transport_type: toTransportType(preselectedType),
       vehicle_condition: (preselectedCondition as any) || undefined,
     },
   });
@@ -323,7 +334,7 @@ export function QuoteForm() {
                       checked={selectedType === value}
                       onChange={() => {
                         setSelectedType(value);
-                        setValue("transport_type", value as any);
+                        setValue("transport_type", value as TransportType);
                       }}
                       className="accent-orange-500 flex-shrink-0"
                     />

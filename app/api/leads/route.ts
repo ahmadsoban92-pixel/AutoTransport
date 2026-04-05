@@ -1,47 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { getAdminClient } from "@/lib/supabaseAdmin";
+import { leadSchema } from "@/lib/validators";
 import { z } from "zod";
 
-const apiLeadSchema = z.object({
-  name: z.string().min(2),
-  email: z.string().email(),
-  phone: z.string().min(10),
-  origin_zip: z.string().length(5),
-  destination_zip: z.string().length(5),
-  vehicle_make: z.string().min(1),
-  vehicle_model: z.string().min(1),
-  vehicle_year: z.number().int().min(1900).max(new Date().getFullYear() + 1),
-  transport_type: z.enum([
-    "Open",
-    "Enclosed",
-    "Expedited",
-    "Door-to-Door",
-    "Snowbird/Seasonal",
-  ] as const),
-  vehicle_condition: z.enum(["Running", "Non-Running"] as const),
+// Extend the front-end schema for the API context:
+// vehicle_year comes in as a string from the form; the API co-erce it to a number
+// for storage consistency. All other fields use the same rules as the client-side schema.
+const apiLeadSchema = leadSchema.extend({
   car_image_url: z.string().url().optional().nullable(),
 });
 
-
 export async function POST(request: NextRequest) {
+  let supabase;
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey =
-      process.env.SUPABASE_SERVICE_ROLE_KEY ||
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    supabase = getAdminClient();
+  } catch {
+    return NextResponse.json(
+      { error: "Server misconfiguration — contact support" },
+      { status: 503 }
+    );
+  }
 
-    if (!supabaseUrl || !supabaseKey || supabaseUrl.startsWith("your_")) {
-      return NextResponse.json(
-        { error: "Supabase is not configured. Please add credentials to .env.local" },
-        { status: 503 }
-      );
-    }
-
-    const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
-
+  try {
     const body = await request.json();
-
     const validation = apiLeadSchema.safeParse(body);
+
     if (!validation.success) {
       return NextResponse.json(
         { error: "Invalid data", details: validation.error.flatten() },
@@ -51,21 +34,21 @@ export async function POST(request: NextRequest) {
 
     const data = validation.data;
 
-    const { data: lead, error } = await supabaseAdmin
+    const { data: lead, error } = await supabase
       .from("leads")
       .insert({
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        origin_zip: data.origin_zip,
-        destination_zip: data.destination_zip,
-        vehicle_make: data.vehicle_make,
-        vehicle_model: data.vehicle_model,
-        vehicle_year: String(data.vehicle_year),
-        transport_type: data.transport_type,
+        name:              data.name,
+        email:             data.email,
+        phone:             data.phone,
+        origin_zip:        data.origin_zip,
+        destination_zip:   data.destination_zip,
+        vehicle_make:      data.vehicle_make,
+        vehicle_model:     data.vehicle_model,
+        vehicle_year:      data.vehicle_year,  // stored as text — matches DB column type
+        transport_type:    data.transport_type,
         vehicle_condition: data.vehicle_condition,
-        car_image_url: data.car_image_url ?? null,
-        status: "New",
+        car_image_url:     data.car_image_url ?? null,
+        status:            "New",
       })
       .select("id")
       .single();
@@ -73,7 +56,7 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error("Supabase insert error:", error.message);
       return NextResponse.json(
-        { error: error.message || "Failed to save lead. Please try again." },
+        { error: "Failed to save lead. Please try again." },
         { status: 500 }
       );
     }
@@ -81,10 +64,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, id: lead.id }, { status: 201 });
   } catch (err) {
     console.error("API error:", err);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 

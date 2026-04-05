@@ -6,15 +6,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { Lead, LeadStatus } from "@/types/lead";
 import { Search, Filter, ArrowUpDown, Eye, User2 } from "lucide-react";
 
-const STATUS_COLORS: Record<LeadStatus, string> = {
-  New: "bg-orange-500/20 text-orange-400 border-orange-500/30",
-  Contacted: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-  Quoted: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-  Booked: "bg-green-500/20 text-green-400 border-green-500/30",
-  Lost: "bg-red-500/20 text-red-400 border-red-500/30",
-};
-
-const ALL_STATUSES: LeadStatus[] = ["New", "Contacted", "Quoted", "Booked", "Lost"];
+import { LEAD_STATUS_COLORS, ALL_LEAD_STATUSES } from "@/lib/constants";
 
 interface Props {
   basePath?: string;
@@ -86,7 +78,7 @@ export function LeadTable({ basePath = "/leads", brokerId, detailCtx = "view", s
             className="rounded-lg bg-blue-950/40 border border-blue-800/40 text-sm text-white px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-500/40"
           >
             <option value="All" className="bg-blue-950">All Statuses</option>
-            {ALL_STATUSES.map((s) => (
+            {ALL_LEAD_STATUSES.map((s) => (
               <option key={s} value={s} className="bg-blue-950">{s}</option>
             ))}
           </select>
@@ -160,7 +152,7 @@ export function LeadTable({ basePath = "/leads", brokerId, detailCtx = "view", s
                       </span>
                     </td>
                     <td className="px-4 py-4">
-                      <span className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_COLORS[lead.status]}`}>
+                      <span className={`text-xs px-2 py-0.5 rounded-full border ${LEAD_STATUS_COLORS[lead.status]}`}>
                         {lead.status}
                       </span>
                     </td>
@@ -182,6 +174,7 @@ export function LeadTable({ basePath = "/leads", brokerId, detailCtx = "view", s
                     <td className="px-4 py-4">
                       <button
                         onClick={(e) => { e.stopPropagation(); goToDetail(lead.id); }}
+                        aria-label={`View lead for ${lead.name}`}
                         className="p-1.5 rounded-lg bg-blue-900/40 text-blue-400 hover:text-orange-400 hover:bg-orange-500/20 transition-all"
                       >
                         <Eye className="w-3.5 h-3.5" />

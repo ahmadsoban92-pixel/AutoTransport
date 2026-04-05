@@ -12,14 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const ALL_STATUSES: LeadStatus[] = ["New", "Contacted", "Quoted", "Booked", "Lost"];
-const STATUS_COLORS: Record<LeadStatus, string> = {
-  New: "bg-orange-500/20 text-orange-400 border-orange-500/30",
-  Contacted: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-  Quoted: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-  Booked: "bg-green-500/20 text-green-400 border-green-500/30",
-  Lost: "bg-red-500/20 text-red-400 border-red-500/30",
-};
+import { LEAD_STATUS_COLORS, ALL_LEAD_STATUSES, LEAD_STATUS_DOT_COLORS } from "@/lib/constants";
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
@@ -380,7 +373,7 @@ export default function LeadDetailPage() {
               </span>
             )}
           </div>
-          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold border ${STATUS_COLORS[lead.status]}`}>
+          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold border ${LEAD_STATUS_COLORS[lead.status]}`}>
             {lead.status}
           </span>
         </div>
@@ -489,13 +482,13 @@ export default function LeadDetailPage() {
               <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="bg-[#0a1628] border border-blue-800/30 rounded-2xl p-6 sticky top-8">
                 <h2 className="text-white font-semibold mb-4">Update Lead Status</h2>
                 <div className="space-y-2 mb-4">
-                  {ALL_STATUSES.map((status) => (
+                  {ALL_LEAD_STATUSES.map((status) => (
                     <button
                       key={status}
                       onClick={() => setNewStatus(status)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-medium transition-all ${newStatus === status ? STATUS_COLORS[status] : "border-blue-800/30 text-blue-400 hover:border-blue-600/50 hover:text-blue-200"}`}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-medium transition-all ${newStatus === status ? LEAD_STATUS_COLORS[status] : "border-blue-800/30 text-blue-400 hover:border-blue-600/50 hover:text-blue-200"}`}
                     >
-                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${status === "New" ? "bg-orange-400" : status === "Contacted" ? "bg-yellow-400" : status === "Quoted" ? "bg-purple-400" : status === "Booked" ? "bg-green-400" : "bg-red-400"}`} />
+                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${LEAD_STATUS_DOT_COLORS[status]}`} />
                       {status}
                     </button>
                   ))}
