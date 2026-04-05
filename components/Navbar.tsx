@@ -8,22 +8,30 @@ import { Truck } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 const navItems = [
-  { name: "Home", url: "/", icon: Home },
-  { name: "About", url: "/about", icon: Info },
-  { name: "Services", url: "/services", icon: Wrench },
-  { name: "Reviews", url: "/reviews", icon: Star },
-  { name: "FAQ", url: "/faq", icon: HelpCircle },
-  { name: "Contact", url: "/contact", icon: Phone },
+  { name: "Home",     url: "/",        icon: Home },
+  { name: "About",    url: "/about",   icon: Info },
+  { name: "Services", url: "/services",icon: Wrench },
+  { name: "Reviews",  url: "/reviews", icon: Star },
+  { name: "FAQ",      url: "/faq",     icon: HelpCircle },
+  { name: "Contact",  url: "/contact", icon: Phone },
 ];
 
 export function SiteNavbar() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
-      {/* Top bar for logo + CTA on desktop */}
-      <div className="hidden md:flex items-center justify-between px-8 py-3 bg-gradient-to-b from-[#060d1f] via-[#060d1f]/90 to-transparent">
+      {/* Top bar — gradient fades to transparent in BOTH modes */}
+      <div
+        className={[
+          "hidden md:flex items-center justify-between px-8 py-3",
+          // Dark mode: fade from dark navy → transparent
+          "dark:bg-gradient-to-b dark:from-[#060d1f] dark:via-[#060d1f]/90 dark:to-transparent",
+          // Light mode: fade from white → transparent  
+          "bg-gradient-to-b from-white/95 via-white/80 to-transparent",
+        ].join(" ")}
+      >
         <Link href="/" className="flex items-center gap-2">
           <Truck className="w-6 h-6 text-orange-400" />
-          <span className="text-lg font-bold text-white">
+          <span className="text-lg font-bold text-gray-900 dark:text-white">
             WESAuto<span className="text-orange-400">Transport</span>
           </span>
         </Link>
@@ -36,7 +44,7 @@ export function SiteNavbar() {
           </Link>
         </div>
       </div>
-      {/* Tubelight navbar */}
+      {/* Tubelight navbar pill */}
       <NavBar items={navItems} />
     </header>
   );
