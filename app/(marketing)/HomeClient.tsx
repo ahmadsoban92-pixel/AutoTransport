@@ -219,8 +219,7 @@ export default function HomeClient() {
       </section>
 
       {/* ===== GLOBE SECTION ===== */}
-      <section className="py-24 px-6 bg-[#0a1628] dark:bg-[#0a1628] relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-blue-100 dark:from-transparent dark:via-transparent dark:to-transparent" />
+      <section className="py-24 px-6 bg-[#0a1628] relative overflow-hidden">
         <div className="max-w-6xl mx-auto relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <motion.div
@@ -229,15 +228,15 @@ export default function HomeClient() {
               viewport={{ once: true }}
             >
               <span className="text-orange-400 text-sm font-semibold uppercase tracking-widest">Nationwide Coverage</span>
-              <h2 className="text-4xl font-bold text-white dark:text-white mt-3 mb-6">
+              <h2 className="text-4xl font-bold text-white mt-3 mb-6">
                 We Ship to Every Corner of America
               </h2>
-              <p className="text-blue-300 dark:text-blue-300 leading-relaxed mb-6">
+              <p className="text-blue-300 leading-relaxed mb-6">
                 With carriers stationed across all 50 states, we can pick up and deliver your vehicle anywhere in the continental United States — and beyond.
               </p>
               <div className="space-y-3">
                 {COVERAGE_ITEMS.map((item) => (
-                  <div key={item} className="flex items-center gap-3 text-blue-200 dark:text-blue-200">
+                  <div key={item} className="flex items-center gap-3 text-blue-200">
                     <CheckCircle className="w-4 h-4 text-orange-400 flex-shrink-0" />
                     <span className="text-sm">{item}</span>
                   </div>
