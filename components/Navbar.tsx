@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useEffect, useLayoutEffect } from "react";
+import { useTheme } from "next-themes";
 import { Home, Info, Wrench, HelpCircle, Phone, Star } from "lucide-react";
 import { NavBar } from "@/components/ui/tubelight-navbar";
 import { Button } from "@/components/ui/button";
@@ -17,21 +19,32 @@ const navItems = [
 ];
 
 export function SiteNavbar() {
+  const { resolvedTheme } = useTheme();
+
+  // We no longer need JS to compute the header gradient — it's handled by
+  // .site-header / html.light .site-header in globals.css, which picks up the
+  // html.light class set by the blocking script before first paint.
+  // We only need JS here to reactively update the logo text class after hydration.
+  const [isLight, setIsLight] = useState(false);
+
+  useLayoutEffect(() => {
+    setIsLight(document.documentElement.classList.contains("light"));
+  }, []);
+
+  useEffect(() => {
+    if (resolvedTheme) setIsLight(resolvedTheme === "light");
+  }, [resolvedTheme]);
+
   return (
-    <header className="fixed top-0 left-0 right-0 z-50">
-      {/* Top bar — gradient fades to transparent in BOTH modes */}
-      <div
-        className={[
-          "hidden md:flex items-center justify-between px-8 py-3",
-          // Dark mode: fade from dark navy → transparent
-          "dark:bg-gradient-to-b dark:from-[#060d1f] dark:via-[#060d1f]/90 dark:to-transparent",
-          // Light mode: fade from white → transparent  
-          "bg-gradient-to-b from-white/95 via-white/80 to-transparent",
-        ].join(" ")}
-      >
+    <header
+      suppressHydrationWarning
+      className="site-header fixed top-0 left-0 right-0 z-50"
+    >
+      {/* Top bar — logo left, actions right */}
+      <div className="hidden md:flex items-center justify-between px-8 py-3">
         <Link href="/" className="flex items-center gap-2">
           <Truck className="w-6 h-6 text-orange-400" />
-          <span className="text-lg font-bold text-gray-900 dark:text-white">
+          <span className={`site-header-logo text-lg font-bold ${isLight ? "text-gray-900" : "text-white"}`}>
             WESAuto<span className="text-orange-400">Transport</span>
           </span>
         </Link>
@@ -44,7 +57,8 @@ export function SiteNavbar() {
           </Link>
         </div>
       </div>
-      {/* Tubelight navbar pill */}
+
+      {/* Tubelight nav pill — centred */}
       <NavBar items={navItems} />
     </header>
   );

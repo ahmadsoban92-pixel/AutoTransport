@@ -73,7 +73,7 @@ function AnimatedHero() {
               </Button>
             </Link>
             <a href="tel:+923059846727">
-              <Button size="lg" className="gap-4" variant="outline">
+              <Button size="lg" className="gap-4 text-white hover:text-white" variant="outline">
                 Call +92 305 9846727 <PhoneCall className="w-4 h-4" />
               </Button>
             </a>

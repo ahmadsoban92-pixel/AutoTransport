@@ -333,3 +333,18 @@ input[type="password"] {
   font-size: 10px !important;
   background: rgba(255,255,255,0.85) !important;
 }
+
+/* ===== SITE HEADER — gradient driven by CSS so it reacts to html.light
+   set by the blocking script BEFORE first paint. No JS flash possible. ===== */
+.site-header {
+  background: linear-gradient(to bottom, #060d1f 0%, rgba(6,13,31,0.92) 55%, transparent 100%);
+}
+html.light .site-header {
+  background: linear-gradient(to bottom, #fdf6e3 0%, rgba(253,246,227,0.88) 55%, transparent 100%);
+}
+.site-header-logo {
+  color: #ffffff;
+}
+html.light .site-header-logo {
+  color: #111827;
+}

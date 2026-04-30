@@ -91,8 +91,10 @@ export default function HomeClient() {
   return (
     <div className="min-h-screen">
 
-      {/* ===== HERO ===== */}
-      <section className="relative min-h-screen flex items-center pt-24 overflow-hidden">
+      {/* ===== HERO — always dark regardless of site theme ===== */}
+      {/* data-force-dark exempts this section from all html.light CSS overrides  */}
+      {/* defined in globals.css (text-white → navy, bg remapping, etc.)          */}
+      <section data-force-dark className="relative min-h-screen flex items-center pt-24 overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/hero-bg.png')" }} />
         <div className="hero-overlay absolute inset-0 bg-gradient-to-b from-[#060d1f]/70 via-[#0a1628]/50 to-[#0f1f3d]/60" />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -103,6 +105,7 @@ export default function HomeClient() {
           <AnimatedHero />
         </div>
       </section>
+
 
       {/* ===== STATS BAR ===== */}
       <section className="bg-[#0a1628] border-y border-blue-900/30">
