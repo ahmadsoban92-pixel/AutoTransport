@@ -157,8 +157,7 @@ export function QuoteForm() {
 
       const payload = {
         ...data,
-        vehicle_year: parseInt(data.vehicle_year),
-        created_at: new Date().toISOString(),
+        // vehicle_year stays as a string — the API schema validates it as /^\d{4}$/
         ...(carImageUrl ? { car_image_url: carImageUrl } : {}),
       };
 
