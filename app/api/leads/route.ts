@@ -3,11 +3,18 @@ import { getAdminClient } from "@/lib/supabaseAdmin";
 import { leadSchema } from "@/lib/validators";
 import { z } from "zod";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
+import { sendMail, quoteReceivedHtml } from "@/lib/emailService";
+import {
+  sendSms,
+  smsQuoteReceived,
+  smsHighValueLead,
+} from "@/lib/smsService";
+import { nanoid } from "nanoid";
 
+// High-value transport types that trigger a broker SMS alert
+const HIGH_VALUE_TYPES = new Set(["Enclosed", "Expedited"]);
 
-// Extend the front-end schema for the API context:
-// vehicle_year comes in as a string from the form; the API co-erce it to a number
-// for storage consistency. All other fields use the same rules as the client-side schema.
+// Extend the front-end schema for the API context
 const apiLeadSchema = leadSchema.extend({
   car_image_url: z.string().url().optional().nullable(),
 });
@@ -45,6 +52,9 @@ export async function POST(request: NextRequest) {
 
     const data = validation.data;
 
+    // Generate a cryptographically unique tracking token for this shipment
+    const trackingToken = nanoid(16);
+
     const { data: lead, error } = await supabase
       .from("leads")
       .insert({
@@ -55,11 +65,12 @@ export async function POST(request: NextRequest) {
         destination_zip:   data.destination_zip,
         vehicle_make:      data.vehicle_make,
         vehicle_model:     data.vehicle_model,
-        vehicle_year:      data.vehicle_year,  // stored as text — matches DB column type
+        vehicle_year:      data.vehicle_year,
         transport_type:    data.transport_type,
         vehicle_condition: data.vehicle_condition,
         car_image_url:     data.car_image_url ?? null,
         status:            "New",
+        tracking_token:    trackingToken,
       })
       .select("id")
       .single();
@@ -72,7 +83,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ success: true, id: lead.id }, { status: 201 });
+    // ── Fire-and-forget notifications (non-blocking) ──────────────────────────
+    const appUrl      = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    const trackingUrl = `${appUrl}/track/${trackingToken}`;
+    const vehicle     = `${data.vehicle_year} ${data.vehicle_make} ${data.vehicle_model}`;
+    const route       = `${data.origin_zip} → ${data.destination_zip}`;
+
+    // 1. Customer confirmation email with tracking link
+    sendMail({
+      to:      data.email,
+      toName:  data.name,
+      subject: "We received your quote request — WESAutoTransport",
+      html:    quoteReceivedHtml(data.name, trackingUrl, trackingToken),
+      text:    `Hi ${data.name}, we received your quote request. Track: ${trackingUrl}`,
+    }).catch((e) => console.error("[leads/POST] email error:", e));
+
+    // 2. Customer SMS (quote received)
+    sendSms(data.phone, smsQuoteReceived(data.name, trackingUrl))
+      .catch((e) => console.error("[leads/POST] sms error:", e));
+
+    // 3. Broker SMS for high-value transport types
+    const brokerPhone = process.env.TWILIO_BROKER_PHONE;
+    if (brokerPhone && HIGH_VALUE_TYPES.has(data.transport_type)) {
+      sendSms(brokerPhone, smsHighValueLead(data.transport_type, vehicle, route))
+        .catch((e) => console.error("[leads/POST] broker sms error:", e));
+    }
+
+    return NextResponse.json(
+      { success: true, id: lead.id, trackingToken },
+      { status: 201 }
+    );
   } catch (err) {
     console.error("API error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

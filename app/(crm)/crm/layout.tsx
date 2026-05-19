@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { CRMRealtimeNotifier } from "@/components/CRMRealtimeNotifier";
 
 const NAV_ITEMS = [
   { href: "/crm/dashboard", label: "Dashboard", icon: LayoutDashboard, accent: false, pulse: false },
@@ -147,6 +148,8 @@ export default function CRMLayout({ children }: { children: React.ReactNode }) {
         <div className="relative z-10">
           {children}
         </div>
+        {/* Real-time lead arrival notifications for brokers */}
+        <CRMRealtimeNotifier />
       </main>
     </div>
   );

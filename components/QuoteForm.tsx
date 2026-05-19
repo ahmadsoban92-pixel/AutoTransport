@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Loader2, CheckCircle2, HelpCircle, Upload, X, CheckCircle } from "lucide-react";
 import type { TransportType } from "@/types/lead";
+import { RouteMapPreview } from "@/components/RouteMapPreview";
 
 const VEHICLE_MAKES = [
   "Acura","Audi","BMW","Buick","Cadillac","Chevrolet","Chrysler","Dodge",
@@ -80,8 +81,11 @@ export function QuoteForm() {
 
   // ZIP validation state
   const [originZipInfo, setOriginZipInfo] = useState<{ valid: boolean; city?: string; state?: string; checked?: boolean } | null>(null);
-  const [destZipInfo, setDestZipInfo] = useState<{ valid: boolean; city?: string; state?: string; checked?: boolean } | null>(null);
-  const [checkingZip, setCheckingZip] = useState<"origin" | "dest" | null>(null);
+  const [destZipInfo, setDestZipInfo]     = useState<{ valid: boolean; city?: string; state?: string; checked?: boolean } | null>(null);
+  const [checkingZip, setCheckingZip]     = useState<"origin" | "dest" | null>(null);
+  // Store the actual ZIP strings for the route map
+  const [originZipVal, setOriginZipVal]   = useState("");
+  const [destZipVal,   setDestZipVal]     = useState("");
 
   // Car image state
   const [carImageFile, setCarImageFile] = useState<File | null>(null);
@@ -105,8 +109,11 @@ export function QuoteForm() {
   const validateZip = async (zip: string, field: "origin" | "dest") => {
     if (!/^\d{5}$/.test(zip)) return;
     setCheckingZip(field);
+    // Store ZIP value for route map
+    if (field === "origin") setOriginZipVal(zip);
+    else setDestZipVal(zip);
     try {
-      const res = await fetch(`/api/validate-zip?zip=${zip}`);
+      const res  = await fetch(`/api/validate-zip?zip=${zip}`);
       const data = await res.json();
       if (field === "origin") setOriginZipInfo({ ...data, checked: true });
       else setDestZipInfo({ ...data, checked: true });
@@ -278,6 +285,16 @@ export function QuoteForm() {
             )}
           </FormField>
         </div>
+
+        {/* Route Map Preview — appears when both ZIPs are valid */}
+        {originZipInfo?.valid && destZipInfo?.valid && originZipVal && destZipVal && (
+          <RouteMapPreview
+            originZip={originZipVal}
+            destZip={destZipVal}
+            originCity={originZipInfo.city}
+            destCity={destZipInfo.city}
+          />
+        )}
       </div>
 
       {/* Section: Vehicle */}
