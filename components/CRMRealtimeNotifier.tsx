@@ -93,8 +93,7 @@ export function CRMRealtimeNotifier() {
   const handleClick = (notif: LiveNotification) => {
     dismiss(notif.id);
     setUnreadCount(0);
-    // Route to /crm/leads/[id] — the proper CRM page with sidebar + "Claim This Lead" button
-    router.push(`/crm/leads/${notif.leadId}`);
+    router.push(`/crm/new-leads`);
   };
 
   if (notifications.length === 0) return null;
