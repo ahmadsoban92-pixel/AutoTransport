@@ -47,8 +47,9 @@ function GlobeCanvas({
   className?: string;
   autoSpin?: boolean;
 }) {
-  let phi = 0;
-  let width = 0;
+  // Use refs so values persist across renders and don't reset on re-mount
+  const phiRef   = useRef(0);
+  const widthRef = useRef(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pointerInteracting = useRef<number | null>(null);
   const pointerMovement = useRef(0);
@@ -71,28 +72,31 @@ function GlobeCanvas({
 
   const onRender = useCallback(
     (state: Record<string, unknown>) => {
-      if (autoSpin && pointerInteracting.current === null) phi += 0.004;
-      state.phi = phi + r;
-      state.width = width * 2;
-      state.height = width * 2;
+      if (autoSpin && pointerInteracting.current === null) phiRef.current += 0.004;
+      state.phi    = phiRef.current + r;
+      state.width  = widthRef.current * 2;
+      state.height = widthRef.current * 2;
     },
     [r, autoSpin]
   );
 
   const onResize = () => {
     if (canvasRef.current) {
-      width = canvasRef.current.offsetWidth;
+      widthRef.current = canvasRef.current.offsetWidth;
     }
   };
 
   useEffect(() => {
+    // Guard against null ref — can happen on fast navigation re-mounts
+    if (!canvasRef.current) return;
+
     window.addEventListener("resize", onResize);
     onResize();
-    const globe = createGlobe(canvasRef.current!, {
+    const globe = createGlobe(canvasRef.current, {
       ...BASE_CONFIG,
       ...config,
-      width: width * 2,
-      height: width * 2,
+      width:  widthRef.current * 2,
+      height: widthRef.current * 2,
       onRender,
     });
     setTimeout(() => {
@@ -102,6 +106,7 @@ function GlobeCanvas({
       globe.destroy();
       window.removeEventListener("resize", onResize);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

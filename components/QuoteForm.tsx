@@ -100,8 +100,9 @@ export function QuoteForm() {
     formState: { errors },
   } = useForm<LeadFormData>({
     resolver: zodResolver(leadSchema),
+    mode: "onBlur",           // validate each field when user leaves it
     defaultValues: {
-      transport_type: toTransportType(preselectedType),
+      transport_type:    toTransportType(preselectedType),
       vehicle_condition: (preselectedCondition as any) || undefined,
     },
   });
@@ -209,7 +210,14 @@ export function QuoteForm() {
             <input {...register("email")} type="email" placeholder="john@example.com" className={inputClass} />
           </FormField>
           <FormField label="Phone Number" error={errors.phone?.message}>
-            <input {...register("phone")} type="tel" placeholder="(800) 555-0100" className={inputClass} />
+            <input
+              {...register("phone")}
+              type="tel"
+              inputMode="numeric"
+              maxLength={16}
+              placeholder="(800) 555-0100"
+              className={inputClass}
+            />
           </FormField>
         </div>
       </div>
