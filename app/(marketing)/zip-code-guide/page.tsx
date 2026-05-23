@@ -199,10 +199,11 @@ export default function ZipCodeGuidePage() {
               className="inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold h-12 px-8 rounded-xl transition-colors">
               Get a Free Quote <ArrowRight className="w-4 h-4" />
             </Link>
-            <Link href="/get-quote"
+            <button
+              onClick={() => window.close()}
               className="inline-flex items-center justify-center gap-2 border border-blue-600 text-blue-200 hover:bg-blue-900/40 font-semibold h-12 px-8 rounded-xl transition-colors">
-              ← Back to Quote Form
-            </Link>
+              ✕ Close Tab
+            </button>
           </div>
         </motion.div>
 
