@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
 import {
   Home, Info, Wrench, HelpCircle, Phone, Star,
   Search, X, Loader2, MapPin, Menu, Truck,
 } from "lucide-react";
-import { NavBar } from "@/components/ui/tubelight-navbar";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -146,7 +145,11 @@ function DesktopNavPill({ onTrack }: { onTrack: () => void }) {
   })?.name ?? navItems[0].name;
 
   return (
-    <div className="flex items-center gap-0.5 bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/20 backdrop-blur-lg py-1 px-1 rounded-full shadow-lg">
+    /* Scrollable so items never clip — scrollbar hidden */
+    <div
+      className="flex items-center gap-0.5 bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/20 backdrop-blur-lg py-1 px-1 rounded-full shadow-lg overflow-x-auto"
+      style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties}
+    >
       {navItems.map((item) => {
         const isActive = activeTab === item.name;
         return (
@@ -154,7 +157,7 @@ function DesktopNavPill({ onTrack }: { onTrack: () => void }) {
             key={item.name}
             href={item.url}
             className={cn(
-              "relative cursor-pointer text-sm font-semibold px-4 py-1.5 rounded-full transition-all duration-200",
+              "relative cursor-pointer text-sm font-semibold px-3 py-1.5 rounded-full transition-all duration-200 whitespace-nowrap flex-shrink-0",
               isActive
                 ? "text-gray-900 dark:text-white bg-orange-500/20"
                 : "text-gray-600 dark:text-white/80 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10"
@@ -174,7 +177,7 @@ function DesktopNavPill({ onTrack }: { onTrack: () => void }) {
       {/* Track Order */}
       <button
         onClick={onTrack}
-        className="flex items-center gap-1.5 cursor-pointer text-sm font-semibold px-4 py-1.5 rounded-full transition-colors text-orange-600 dark:text-orange-500 hover:text-orange-700 dark:hover:text-orange-400 hover:bg-orange-500/10 whitespace-nowrap"
+        className="flex items-center gap-1.5 cursor-pointer text-sm font-semibold px-3 py-1.5 rounded-full transition-colors text-orange-600 dark:text-orange-500 hover:text-orange-700 dark:hover:text-orange-400 hover:bg-orange-500/10 whitespace-nowrap flex-shrink-0"
       >
         <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
         Track Order
@@ -189,49 +192,83 @@ export function SiteNavbar() {
   const { resolvedTheme } = useTheme();
   const [showTrackModal, setShowTrackModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+  const [headerHeight, setHeaderHeight] = useState(57);
 
-  // Auto-close drawer when viewport widens past md breakpoint
+  // Measure real header height — drives CSS var + mobile drawer top
   useEffect(() => {
-    const onResize = () => { if (window.innerWidth >= 768) setMobileMenuOpen(false); };
+    const header = headerRef.current;
+    if (!header) return;
+    const obs = new ResizeObserver(([entry]) => {
+      const h = Math.round(entry.contentRect.height);
+      setHeaderHeight(h);
+      document.documentElement.style.setProperty("--header-height", `${h}px`);
+    });
+    obs.observe(header);
+    return () => obs.disconnect();
+  }, []);
+
+  // Auto-close drawer when viewport widens past lg breakpoint
+  useEffect(() => {
+    const onResize = () => { if (window.innerWidth >= 1024) setMobileMenuOpen(false); };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
+
+  // Body scroll-lock while mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileMenuOpen]);
 
   return (
     <>
       {/* ── Fixed header ── */}
       <header
+        ref={headerRef}
         className="fixed top-0 left-0 right-0 z-50 bg-[#fdf6e3]/90 dark:bg-[#060d1f]/90 backdrop-blur-md border-b border-transparent dark:border-blue-900/30"
       >
-        {/* ── Desktop: single row ── */}
-        <div className="hidden md:flex items-center px-8 py-3 relative">
-          {/* Left: logo + theme toggle */}
-          <div className="flex items-center gap-3 flex-shrink-0">
+        {/* ── Desktop: true 3-column GRID (no absolute) — shows at ≥ 1024px ── */}
+        {/* grid-cols-[1fr_auto_1fr]: both side columns are equal 1fr, so the
+            auto-width pill column sits at exact viewport center always.        */}
+        <div className="hidden lg:grid grid-cols-[1fr_auto_1fr] items-center px-6 py-3 gap-2">
+          {/* LEFT: logo + theme toggle */}
+          <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2">
               <Truck className="w-6 h-6 text-orange-400" />
-              <span className="text-lg font-bold text-gray-900 dark:text-white">
+              <span className="text-base font-bold text-gray-900 dark:text-white whitespace-nowrap">
                 WESAuto<span className="text-orange-400">Transport</span>
               </span>
             </Link>
             <ThemeToggle />
           </div>
 
-          {/* Center: nav pill — absolutely positioned so it's truly centered in the header */}
-          <div className="absolute left-1/2 -translate-x-1/2">
+          {/* CENTER: nav pill — sits in the auto column, truly centred by equal 1fr sides */}
+          <div className="flex justify-center">
             <DesktopNavPill onTrack={() => setShowTrackModal(true)} />
           </div>
 
-          {/* Right spacer — keeps logo from drifting */}
-          <div className="ml-auto" />
+          {/* RIGHT: Get Quote CTA */}
+          <div className="flex justify-end">
+            <Link href="/get-quote">
+              <span className="inline-flex items-center px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold transition-colors whitespace-nowrap cursor-pointer">
+                Get Quote
+              </span>
+            </Link>
+          </div>
         </div>
 
-        {/* ── Mobile top bar ── */}
-        <div className="flex md:hidden items-center justify-between px-4 py-3">
+        {/* ── Mobile/tablet top bar — shows below 1024px ── */}
+        <div className="flex lg:hidden items-center justify-between px-4 py-3">
           {/* Left: logo + theme toggle */}
           <div className="flex items-center gap-2">
             <Link href="/" className="flex items-center gap-2">
               <Truck className="w-5 h-5 text-orange-400" />
-              <span className="text-base font-bold text-white">
+              <span className="text-base font-bold text-gray-900 dark:text-white">
                 WESAuto<span className="text-orange-400">Transport</span>
               </span>
             </Link>
@@ -243,7 +280,7 @@ export function SiteNavbar() {
             <button
               onClick={() => setShowTrackModal(true)}
               aria-label="Track order"
-              className="p-2 rounded-lg text-blue-300 hover:text-orange-400 hover:bg-blue-900/40 transition-colors"
+              className="p-2 rounded-lg text-gray-600 dark:text-blue-300 hover:text-orange-500 dark:hover:text-orange-400 hover:bg-gray-100 dark:hover:bg-blue-900/40 transition-colors"
             >
               <MapPin className="w-4 h-4" />
             </button>
@@ -255,7 +292,7 @@ export function SiteNavbar() {
             <button
               onClick={() => setMobileMenuOpen((o) => !o)}
               aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-              className="p-2 rounded-lg text-blue-300 hover:text-white hover:bg-blue-900/40 transition-colors"
+              className="p-2 rounded-lg text-gray-600 dark:text-blue-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-blue-900/40 transition-colors"
             >
               {mobileMenuOpen
                 ? <X    className="w-5 h-5" />
@@ -279,8 +316,12 @@ export function SiteNavbar() {
             animate={{ opacity: 1, y: 0  }}
             exit={{    opacity: 0, y: -8  }}
             transition={{ duration: 0.2 }}
-            className="fixed left-0 right-0 z-[49] bg-[#0a1628]/98 backdrop-blur-md border-b border-blue-900/40 shadow-2xl md:hidden"
-            style={{ top: "57px" }}
+            className="fixed left-0 right-0 z-[49] bg-[#0a1628]/98 backdrop-blur-md border-b border-blue-900/40 shadow-2xl lg:hidden"
+            style={{
+              top: headerHeight,
+              maxHeight: `calc(100dvh - ${headerHeight}px)`,
+              overflowY: "auto",
+            }}
           >
             <div className="px-4 py-3 space-y-1">
               {navItems.map((item) => (
@@ -316,10 +357,6 @@ export function SiteNavbar() {
         )}
       </AnimatePresence>
 
-      {/* ── Mobile bottom tubelight pill (icons only) ── */}
-      <div className="md:hidden">
-        <NavBar items={navItems} />
-      </div>
 
       {/* ── Track Order Modal ── */}
       <AnimatePresence>

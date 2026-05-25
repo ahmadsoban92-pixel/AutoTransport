@@ -102,7 +102,7 @@ export function ActivityToastManager() {
     <div
       aria-live="polite"
       aria-label="Recent activity notifications"
-      className="fixed bottom-5 left-5 z-50 flex flex-col gap-3 pointer-events-none max-w-[calc(100vw-2.5rem)]"
+      className="fixed bottom-24 lg:bottom-5 left-4 lg:left-5 z-50 flex flex-col gap-3 pointer-events-none max-w-[calc(100vw-2.5rem)]"
     >
       <AnimatePresence mode="popLayout">
         {toasts.map((toast) => (
@@ -113,7 +113,8 @@ export function ActivityToastManager() {
             animate={{ opacity: 1, y: 0,  scale: 1    }}
             exit={{    opacity: 0, y: 16, scale: 0.92  }}
             transition={{ type: "spring", stiffness: 420, damping: 30 }}
-            className={`pointer-events-auto flex items-start gap-2.5 pl-3 pr-2 py-2 rounded-xl max-w-[260px] ${card}`}
+            className={`pointer-events-auto flex items-start gap-2.5 pl-3 pr-2 py-2 rounded-xl ${card}`}
+            style={{ maxWidth: "min(13rem, calc(100vw - 3rem))" }}
             role="status"
           >
             {/* Icon */}

@@ -46,7 +46,7 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-[#060d1f] pt-28 pb-16">
-      <div className="max-w-5xl mx-auto px-6">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6">
         {/* Header with image */}
         <motion.div {...fadeUp(0)} className="relative rounded-3xl overflow-hidden mb-14">
           <Image

@@ -36,7 +36,10 @@ function AnimatedHero() {
             </Link>
           </div>
           <div className="flex gap-4 flex-col">
-            <h1 className="text-5xl md:text-7xl max-w-3xl tracking-tighter text-center font-bold text-white">
+            <h1
+              className="max-w-3xl tracking-tighter text-center font-bold text-white"
+              style={{ fontSize: "clamp(1.875rem, 3vw + 1.25rem, 4.5rem)", lineHeight: 1.1 }}
+            >
               <span>Auto Transport That&apos;s</span>
               <span className="relative flex w-full justify-center overflow-hidden text-center md:pb-4 md:pt-1">
                 &nbsp;
@@ -61,23 +64,26 @@ function AnimatedHero() {
               </span>
             </h1>
 
-            <p className="text-lg md:text-xl leading-relaxed tracking-tight text-white max-w-2xl text-center drop-shadow-sm">
+            <p
+              className="leading-relaxed tracking-tight text-white max-w-2xl text-center drop-shadow-sm"
+              style={{ fontSize: "clamp(1rem, 1vw + 0.75rem, 1.25rem)" }}
+            >
               We connect you with the nation&apos;s top auto carriers to ship your
               vehicle safely, on time, and at the best price. Get a Quote in less than 2 minutes.
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row gap-3 flex-wrap justify-center">
-            <Link href="/get-quote" className="min-w-[200px]">
+          <div className="flex flex-col sm:flex-row gap-3 flex-wrap justify-center w-full max-w-2xl">
+            <Link href="/get-quote" className="w-full sm:w-auto min-w-[180px]">
               <Button size="lg" className="gap-4 bg-orange-500 hover:bg-orange-600 text-white border-0 w-full">
                 Get a Free Quote <MoveRight className="w-4 h-4" />
               </Button>
             </Link>
-            <a href="tel:+923059846727" className="min-w-[200px]">
+            <a href="tel:+923059846727" className="w-full sm:w-auto min-w-[180px]">
               <Button size="lg" className="gap-4 text-white hover:text-white w-full" variant="outline">
                 Call +92 305 9846727 <PhoneCall className="w-4 h-4" />
               </Button>
             </a>
-            <a href="https://wa.me/923059846727" target="_blank" rel="noopener noreferrer" className="min-w-[200px]">
+            <a href="https://wa.me/923059846727" target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto min-w-[180px]">
               <Button size="lg" className="gap-4 bg-green-600 hover:bg-green-700 text-white border-0 w-full">
                 WhatsApp Us <MessageCircle className="w-4 h-4" />
               </Button>

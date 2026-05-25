@@ -24,7 +24,7 @@ export function NavBar({ items, className }: NavBarProps) {
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
+      setIsMobile(window.innerWidth < 1024);
     };
     handleResize();
     window.addEventListener("resize", handleResize);
@@ -48,11 +48,12 @@ export function NavBar({ items, className }: NavBarProps) {
     <div
       suppressHydrationWarning
       className={cn(
-        "fixed bottom-0 sm:top-0 left-1/2 -translate-x-1/2 z-30 mb-6 sm:pt-6 pointer-events-none",
+        "fixed bottom-0 left-1/2 -translate-x-1/2 z-30 pointer-events-none",
+        "pb-4", /* clears home-indicator on notched phones */
         className
       )}
     >
-      <div suppressHydrationWarning className="flex items-center gap-1 sm:gap-3 bg-white/10 border border-white/20 backdrop-blur-lg py-1 px-1 sm:px-1 rounded-full shadow-lg pointer-events-auto">
+      <div suppressHydrationWarning className="flex items-center gap-1 bg-white/10 border border-white/20 backdrop-blur-lg py-1 px-1 rounded-full shadow-lg pointer-events-auto">
         {items.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.name;
@@ -63,15 +64,13 @@ export function NavBar({ items, className }: NavBarProps) {
               href={item.url}
               onClick={() => handleNavClick(item)}
               className={cn(
-                "relative cursor-pointer text-sm font-semibold px-2 sm:px-6 py-2 rounded-full transition-colors",
+                "relative cursor-pointer text-sm font-semibold px-3 py-2 rounded-full transition-colors",
                 "text-white/80 hover:text-white",
                 isActive && "bg-white/20 text-white"
               )}
             >
-              <span className="hidden md:inline">{item.name}</span>
-              <span className="md:hidden">
-                <Icon size={18} strokeWidth={2.5} />
-              </span>
+              {/* Always icon-only in bottom nav — text labels live in the hamburger drawer */}
+              <Icon size={18} strokeWidth={2.5} />
               {isActive && (
                 <motion.div
                   layoutId="lamp"

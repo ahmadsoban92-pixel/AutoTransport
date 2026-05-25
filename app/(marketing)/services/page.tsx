@@ -70,7 +70,7 @@ export default function ServicesPage() {
     <div className="min-h-screen bg-[#060d1f] pt-28 pb-16">
 
       {/* ── Header ── */}
-      <section className="pb-8 px-6 text-center">
+      <section className="pb-8 px-4 sm:px-6 text-center">
 
         <div className="max-w-4xl mx-auto">
           <motion.div {...fadeUp(0)} className="relative rounded-3xl overflow-hidden mb-8">
@@ -86,7 +86,7 @@ export default function ServicesPage() {
       </section>
 
       {/* ── Services Grid ── */}
-      <section className="px-6 pb-20">
+      <section className="px-4 sm:px-6 pb-20">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service, i) => (
             <motion.div key={service.title} {...fadeUp(i * 0.08)}
@@ -114,7 +114,7 @@ export default function ServicesPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-16 px-6 text-center bg-[#0a1628] border-t border-blue-900/30">
+      <section className="py-16 px-4 sm:px-6 text-center bg-[#0a1628] border-t border-blue-900/30">
         <motion.div {...fadeUp(0)} className="max-w-2xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">Not sure which service you need?</h2>
           <p className="text-blue-300 mb-8">Our transport specialists are available to help you choose the right option for your vehicle and budget.</p>

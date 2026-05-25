@@ -34,7 +34,7 @@ export default function AboutPage() {
     <div className="min-h-screen bg-[#060d1f] pt-28 pb-16">
 
       {/* ── Hero ── */}
-      <section className="pb-10 px-6 text-center">
+      <section className="pb-10 px-4 sm:px-6 text-center">
 
         <div className="max-w-4xl mx-auto">
           <motion.div {...fadeUp(0)} className="relative rounded-3xl overflow-hidden mb-10">
@@ -56,7 +56,7 @@ export default function AboutPage() {
       </section>
 
       {/* ── Stats ── */}
-      <section className="py-10 px-6 bg-[#0a1628] border-y border-blue-900/30">
+      <section className="py-10 px-4 sm:px-6 bg-[#0a1628] border-y border-blue-900/30">
         <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center">
           {stats.map((s, i) => (
             <motion.div key={s.label} {...fadeUp(i * 0.1)}>
@@ -68,7 +68,7 @@ export default function AboutPage() {
       </section>
 
       {/* ── Our Story ── */}
-      <section className="py-20 px-6">
+      <section className="py-16 sm:py-20 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
           <motion.h2 {...fadeUp(0)} className="text-3xl font-bold text-white mb-10 text-center">Our Story</motion.h2>
           <div className="relative pl-7 sm:pl-8 border-l border-blue-800/50 space-y-10">
@@ -84,7 +84,7 @@ export default function AboutPage() {
       </section>
 
       {/* ── Values ── */}
-      <section className="py-20 px-6 bg-[#0a1628]">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 bg-[#0a1628]">
         <div className="max-w-4xl mx-auto">
           <motion.h2 {...fadeUp(0)} className="text-3xl font-bold text-white mb-12 text-center">Our Core Values</motion.h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -101,7 +101,7 @@ export default function AboutPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-20 px-6 text-center">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 text-center">
         <motion.div {...fadeUp(0)} className="max-w-2xl mx-auto">
           <h2 className="text-3xl font-bold text-white mb-4">Ready to Ship Your Vehicle?</h2>
           <p className="text-blue-300 mb-8">Get a free, no-obligation quote in under 60 seconds.</p>

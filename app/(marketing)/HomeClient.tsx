@@ -97,10 +97,10 @@ export default function HomeClient() {
       <section data-force-dark className="relative min-h-screen flex items-center pt-24 overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/hero-bg.png')" }} />
         <div className="hero-overlay absolute inset-0 bg-gradient-to-b from-[#060d1f]/70 via-[#0a1628]/50 to-[#0f1f3d]/60" />
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl" />
-        </div>
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <div className="absolute top-1/4 left-1/4 w-48 h-48 md:w-96 md:h-96 bg-blue-600/10 rounded-full blur-3xl" />
+              <div className="absolute bottom-1/4 right-1/4 w-48 h-48 md:w-96 md:h-96 bg-orange-500/10 rounded-full blur-3xl" />
+            </div>
         <div className="relative z-10 w-full">
           <AnimatedHero />
         </div>
@@ -109,8 +109,8 @@ export default function HomeClient() {
 
       {/* ===== STATS BAR ===== */}
       <section className="bg-[#0a1628] border-y border-blue-900/30">
-        <div className="max-w-6xl mx-auto px-6 py-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
             {STATS.map((stat, i) => (
               <motion.div
                 key={stat.label}
@@ -121,7 +121,7 @@ export default function HomeClient() {
                 className="flex flex-col items-center text-center"
               >
                 <stat.icon className="w-6 h-6 text-orange-400 mb-2" />
-                <div className="text-3xl font-bold text-white">{stat.value}</div>
+                <div className="text-2xl sm:text-3xl font-bold text-white">{stat.value}</div>
                 <div className="text-sm text-blue-300 mt-1">{stat.label}</div>
               </motion.div>
             ))}
@@ -130,17 +130,17 @@ export default function HomeClient() {
       </section>
 
       {/* ===== HOW IT WORKS ===== */}
-      <section id="how-it-works" className="py-24 px-6 bg-[#060d1f]">
+      <section id="how-it-works" className="py-16 sm:py-24 px-4 sm:px-6 bg-[#060d1f]">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-12 sm:mb-16"
           >
             <span className="text-orange-400 text-sm font-semibold uppercase tracking-widest">Simple Process</span>
-            <h2 className="text-4xl font-bold text-white mt-3">How Auto Transport Works</h2>
-            <p className="text-blue-300 mt-4 max-w-2xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mt-3">How Auto Transport Works</h2>
+            <p className="text-blue-300 mt-4 max-w-2xl mx-auto text-sm sm:text-base">
               We&apos;ve simplified the car shipping process into 4 easy steps. From quote to delivery, we handle everything.
             </p>
           </motion.div>
@@ -177,7 +177,7 @@ export default function HomeClient() {
       </section>
 
       {/* ===== SERVICES ===== */}
-      <section className="py-24 px-6 bg-[#0a1628]">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[#0a1628]">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -186,24 +186,24 @@ export default function HomeClient() {
             className="text-center mb-12"
           >
             <span className="text-orange-400 text-sm font-semibold uppercase tracking-widest">What We Offer</span>
-            <h2 className="text-4xl font-bold text-white mt-3">Our Transport Services</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mt-3">Our Transport Services</h2>
           </motion.div>
           <FeaturesSectionWithHoverEffects />
         </div>
       </section>
 
       {/* ===== WHY CHOOSE US ===== */}
-      <section className="py-24 px-6 bg-[#060d1f]">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[#060d1f]">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-12 sm:mb-16"
           >
             <span className="text-orange-400 text-sm font-semibold uppercase tracking-widest">Why Us</span>
-            <h2 className="text-4xl font-bold text-white mt-3">Why Choose WESAutoTransport?</h2>
-            <p className="text-blue-300 mt-4 max-w-2xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mt-3">Why Choose WESAutoTransport?</h2>
+            <p className="text-blue-300 mt-4 max-w-2xl mx-auto text-sm sm:text-base">
               We&apos;re more than a broker — we&apos;re your dedicated transport partner.
             </p>
           </motion.div>
@@ -222,19 +222,19 @@ export default function HomeClient() {
       </section>
 
       {/* ===== GLOBE SECTION ===== */}
-      <section className="py-24 px-6 bg-[#0a1628] relative overflow-hidden">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[#0a1628] relative overflow-hidden">
         <div className="max-w-6xl mx-auto relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
               <span className="text-orange-400 text-sm font-semibold uppercase tracking-widest">Nationwide Coverage</span>
-              <h2 className="text-4xl font-bold text-white mt-3 mb-6">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mt-3 mb-6">
                 We Ship to Every Corner of America
               </h2>
-              <p className="text-blue-300 leading-relaxed mb-6">
+              <p className="text-blue-300 leading-relaxed mb-6 text-sm sm:text-base">
                 With carriers stationed across all 50 states, we can pick up and deliver your vehicle anywhere in the continental United States — and beyond.
               </p>
               <div className="space-y-3">
@@ -258,8 +258,8 @@ export default function HomeClient() {
       </section>
 
       {/* ===== CUSTOMER STORIES (infinite marquee scroll) ===== */}
-      <section className="py-24 px-0 bg-[#060d1f] overflow-hidden">
-        <div className="max-w-6xl mx-auto px-6 mb-12">
+      <section className="py-16 sm:py-24 px-0 bg-[#060d1f] overflow-hidden">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 mb-10 sm:mb-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -267,7 +267,7 @@ export default function HomeClient() {
             className="text-center"
           >
             <span className="text-orange-400 text-sm font-semibold uppercase tracking-widest">Customer Stories</span>
-            <h2 className="text-4xl font-bold text-white mt-3">What Our Customers Say</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mt-3">What Our Customers Say</h2>
           </motion.div>
         </div>
         {/* Marquee container */}
@@ -310,8 +310,8 @@ export default function HomeClient() {
       </section>
 
       {/* ===== CTA ===== */}
-      <section className="py-24 px-6 bg-gradient-to-br from-[#0a1628] to-[#1e3a5f] relative overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-gradient-to-br from-[#0a1628] to-[#1e3a5f] relative overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[min(600px,100%)] h-[300px] bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -320,22 +320,22 @@ export default function HomeClient() {
             transition={{ duration: 0.5 }}
           >
             <TypewriterEffectSmooth words={CTA_WORDS} />
-            <p className="text-blue-300 text-lg mb-10 max-w-2xl mx-auto">
+            <p className="text-blue-300 text-base sm:text-lg mb-8 sm:mb-10 max-w-2xl mx-auto">
               Join over 15,000 customers who trusted us to ship their vehicles safely and on time. Get your free quote — no obligation, no credit card required.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/get-quote">
-                <Button className="bg-orange-500 hover:bg-orange-600 text-white border-0 h-12 px-8 text-base font-semibold">
+              <Link href="/get-quote" className="w-full sm:w-auto">
+                <Button className="bg-orange-500 hover:bg-orange-600 text-white border-0 h-12 px-8 text-base font-semibold w-full">
                   Get Your Free Quote <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
-              <Link href="/contact">
-                <Button variant="outline" className="h-12 px-8 text-base border-blue-600 text-blue-200 hover:bg-blue-900/40">
+              <Link href="/contact" className="w-full sm:w-auto">
+                <Button variant="outline" className="h-12 px-8 text-base border-blue-600 text-blue-200 hover:bg-blue-900/40 w-full">
                   Contact Us
                 </Button>
               </Link>
-              <a href="https://wa.me/923059846727" target="_blank" rel="noopener noreferrer">
-                <Button className="h-12 px-8 text-base bg-green-600 hover:bg-green-700 text-white border-0 font-semibold">
+              <a href="https://wa.me/923059846727" target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
+                <Button className="h-12 px-8 text-base bg-green-600 hover:bg-green-700 text-white border-0 font-semibold w-full">
                   WhatsApp Us
                 </Button>
               </a>

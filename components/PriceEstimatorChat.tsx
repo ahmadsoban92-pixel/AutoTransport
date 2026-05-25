@@ -236,7 +236,8 @@ export default function PriceEstimatorChat() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-40 right-3 sm:bottom-24 sm:right-6 z-[60] w-[calc(100vw-24px)] sm:w-96 max-h-[70vh] flex flex-col rounded-2xl bg-[#0a1628] border border-blue-800/40 shadow-2xl overflow-hidden"
+            className="fixed bottom-40 right-3 sm:bottom-24 sm:right-6 z-[60] flex flex-col rounded-2xl bg-[#0a1628] border border-blue-800/40 shadow-2xl overflow-hidden"
+            style={{ width: "min(24rem, calc(100vw - 1.5rem))", maxHeight: "70dvh" }}
           >
             {/* Header */}
             <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-orange-500 to-orange-600">

@@ -33,8 +33,8 @@ export default function CRMLayout({ children }: { children: React.ReactNode }) {
     // CRM is now fully theme-aware — light/dark mode both work
     <div suppressHydrationWarning className="min-h-screen bg-[#050c1a] flex">
 
-      {/* ===== SIDEBAR (desktop) ===== */}
-      <aside className="hidden md:flex w-64 flex-col fixed inset-y-0 left-0 z-40 bg-gradient-to-b from-[#080f20] to-[#060d1a] border-r border-blue-900/30">
+      {/* ===== SIDEBAR (shows at ≥ 1024px) ===== */}
+      <aside className="hidden lg:flex w-60 flex-col fixed inset-y-0 left-0 z-40 bg-gradient-to-b from-[#080f20] to-[#060d1a] border-r border-blue-900/30">
         {/* Logo */}
         <div className="px-6 py-5 border-b border-blue-900/30">
           <Link href="/crm/dashboard" className="flex items-center gap-3 group">
@@ -97,8 +97,8 @@ export default function CRMLayout({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      {/* ===== MOBILE TOPBAR ===== */}
-      <header className="md:hidden fixed top-0 inset-x-0 z-40 bg-[#080f20]/95 backdrop-blur-md border-b border-blue-900/30 h-14 flex items-center px-4 gap-3">
+      {/* ===== MOBILE/TABLET TOPBAR (shows below 1024px) ===== */}
+      <header className="lg:hidden fixed top-0 inset-x-0 z-40 bg-[#080f20]/95 backdrop-blur-md border-b border-blue-900/30 h-14 flex items-center px-4 gap-3">
         <Link href="/crm/dashboard" className="flex items-center gap-2 shrink-0">
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
             <Truck className="w-4 h-4 text-white" />
@@ -136,15 +136,15 @@ export default function CRMLayout({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* ===== MAIN CONTENT ===== */}
-      <main suppressHydrationWarning className="flex-1 md:ml-64 pt-14 md:pt-0 min-h-screen">
+      <main suppressHydrationWarning className="flex-1 lg:ml-60 pt-14 lg:pt-0 min-h-screen">
         {/* Subtle grid background */}
-        <div className="fixed inset-0 md:left-64 pointer-events-none opacity-[0.015]" style={{
+        <div className="fixed inset-0 lg:left-60 pointer-events-none opacity-[0.015]" style={{
           backgroundImage: "linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)",
           backgroundSize: "40px 40px",
         }} />
         {/* Ambient glows */}
-        <div className="fixed top-0 right-0 w-96 h-96 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="fixed bottom-0 left-64 w-96 h-96 bg-blue-600/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="fixed top-0 right-0 w-64 h-64 md:w-96 md:h-96 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="fixed bottom-0 lg:left-60 left-0 w-64 h-64 md:w-96 md:h-96 bg-blue-600/5 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10">
           {children}
         </div>
