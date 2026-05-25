@@ -70,7 +70,8 @@ export default function ServicesPage() {
     <div className="min-h-screen bg-[#060d1f] pt-28 pb-16">
 
       {/* ── Header ── */}
-      <section className="py-16 px-6 text-center">
+      <section className="pb-8 px-6 text-center">
+
         <div className="max-w-4xl mx-auto">
           <motion.div {...fadeUp(0)} className="relative rounded-3xl overflow-hidden mb-8">
             <Image src="/services-banner.png" alt="Auto Transport Services" width={1200} height={300} quality={90} className="w-full h-44 md:h-56 object-cover" />

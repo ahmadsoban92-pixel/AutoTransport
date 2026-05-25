@@ -113,20 +113,20 @@ export function ActivityToastManager() {
             animate={{ opacity: 1, y: 0,  scale: 1    }}
             exit={{    opacity: 0, y: 16, scale: 0.92  }}
             transition={{ type: "spring", stiffness: 420, damping: 30 }}
-            className={`pointer-events-auto flex items-start gap-3 pl-4 pr-3 py-3 rounded-2xl max-w-sm ${card}`}
+            className={`pointer-events-auto flex items-start gap-2.5 pl-3 pr-2 py-2 rounded-xl max-w-[260px] ${card}`}
             role="status"
           >
             {/* Icon */}
-            <div className={`w-8 h-8 rounded-lg ${iconBg} flex items-center justify-center flex-shrink-0 mt-0.5`}>
-              <TrendingUp className={`w-4 h-4 ${label}`} />
+            <div className={`w-6 h-6 rounded-md ${iconBg} flex items-center justify-center flex-shrink-0 mt-0.5`}>
+              <TrendingUp className={`w-3.5 h-3.5 ${label}`} />
             </div>
 
             {/* Text */}
             <div className="flex-1 min-w-0">
-              <p className={`text-[11px] font-semibold ${label} uppercase tracking-wider leading-none mb-1`}>
+              <p className={`text-[10px] font-semibold ${label} uppercase tracking-wider leading-none mb-0.5`}>
                 Live Activity
               </p>
-              <p className={`${body} text-sm leading-snug`}>{toast.message}</p>
+              <p className={`${body} text-xs leading-snug`}>{toast.message}</p>
             </div>
 
             {/* Dismiss */}

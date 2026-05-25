@@ -34,7 +34,8 @@ export default function AboutPage() {
     <div className="min-h-screen bg-[#060d1f] pt-28 pb-16">
 
       {/* ── Hero ── */}
-      <section className="py-20 px-6 text-center">
+      <section className="pb-10 px-6 text-center">
+
         <div className="max-w-4xl mx-auto">
           <motion.div {...fadeUp(0)} className="relative rounded-3xl overflow-hidden mb-10">
             <Image src="/about-team.png" alt="Our Team" width={1200} height={400} quality={90} className="w-full h-56 md:h-72 object-cover" />

@@ -27,7 +27,7 @@ function AnimatedHero() {
   return (
     <div className="w-full">
       <div className="container mx-auto px-4">
-        <div className="flex gap-8 py-20 lg:py-40 items-center justify-center flex-col">
+        <div className="flex gap-5 py-8 lg:py-12 items-center justify-center flex-col">
           <div>
             <Link href="/get-quote">
               <Button variant="secondary" size="sm" className="gap-4 bg-orange-100 text-orange-700 hover:bg-orange-200 border border-orange-200">
@@ -66,19 +66,19 @@ function AnimatedHero() {
               vehicle safely, on time, and at the best price. Get a Quote in less than 2 minutes.
             </p>
           </div>
-          <div className="flex flex-row gap-3 flex-wrap justify-center">
-            <Link href="/get-quote">
-              <Button size="lg" className="gap-4 bg-orange-500 hover:bg-orange-600 text-white border-0">
+          <div className="flex flex-col sm:flex-row gap-3 flex-wrap justify-center">
+            <Link href="/get-quote" className="min-w-[200px]">
+              <Button size="lg" className="gap-4 bg-orange-500 hover:bg-orange-600 text-white border-0 w-full">
                 Get a Free Quote <MoveRight className="w-4 h-4" />
               </Button>
             </Link>
-            <a href="tel:+923059846727">
-              <Button size="lg" className="gap-4 text-white hover:text-white" variant="outline">
+            <a href="tel:+923059846727" className="min-w-[200px]">
+              <Button size="lg" className="gap-4 text-white hover:text-white w-full" variant="outline">
                 Call +92 305 9846727 <PhoneCall className="w-4 h-4" />
               </Button>
             </a>
-            <a href="https://wa.me/923059846727" target="_blank" rel="noopener noreferrer">
-              <Button size="lg" className="gap-4 bg-green-600 hover:bg-green-700 text-white border-0">
+            <a href="https://wa.me/923059846727" target="_blank" rel="noopener noreferrer" className="min-w-[200px]">
+              <Button size="lg" className="gap-4 bg-green-600 hover:bg-green-700 text-white border-0 w-full">
                 WhatsApp Us <MessageCircle className="w-4 h-4" />
               </Button>
             </a>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
+import { usePathname } from "next/navigation";
 import {
   Home, Info, Wrench, HelpCircle, Phone, Star,
   Search, X, Loader2, MapPin, Menu, Truck,
@@ -13,6 +14,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { USLocationBanner } from "@/components/USLocationBanner";
+import { cn } from "@/lib/utils";
 
 const navItems = [
   { name: "Home",     url: "/",         icon: Home      },
@@ -133,17 +135,60 @@ function TrackOrderModal({ onClose }: { onClose: () => void }) {
   );
 }
 
+// ─── Inline desktop nav pill (contained in header) ────────────────────────────
+
+function DesktopNavPill({ onTrack }: { onTrack: () => void }) {
+  const pathname = usePathname();
+
+  const activeTab = navItems.find((item) => {
+    if (item.url === "/") return pathname === "/";
+    return pathname.startsWith(item.url);
+  })?.name ?? navItems[0].name;
+
+  return (
+    <div className="flex items-center gap-0.5 bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/20 backdrop-blur-lg py-1 px-1 rounded-full shadow-lg">
+      {navItems.map((item) => {
+        const isActive = activeTab === item.name;
+        return (
+          <Link
+            key={item.name}
+            href={item.url}
+            className={cn(
+              "relative cursor-pointer text-sm font-semibold px-4 py-1.5 rounded-full transition-all duration-200",
+              isActive
+                ? "text-gray-900 dark:text-white bg-orange-500/20"
+                : "text-gray-600 dark:text-white/80 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10"
+            )}
+          >
+            {isActive && (
+              <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-orange-400 rounded-b-full" />
+            )}
+            <span>{item.name}</span>
+          </Link>
+        );
+      })}
+
+      {/* Separator */}
+      <span className="w-px h-4 bg-gray-300 dark:bg-white/25 mx-1 flex-shrink-0" />
+
+      {/* Track Order */}
+      <button
+        onClick={onTrack}
+        className="flex items-center gap-1.5 cursor-pointer text-sm font-semibold px-4 py-1.5 rounded-full transition-colors text-orange-600 dark:text-orange-500 hover:text-orange-700 dark:hover:text-orange-400 hover:bg-orange-500/10 whitespace-nowrap"
+      >
+        <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+        Track Order
+      </button>
+    </div>
+  );
+}
+
 // ─── Navbar ────────────────────────────────────────────────────────────────────
 
 export function SiteNavbar() {
   const { resolvedTheme } = useTheme();
   const [showTrackModal, setShowTrackModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  // mounted guard — prevents hydration mismatch with next-themes
-  // Server and first client render both use false (dark), then update after mount
-  const [mounted,        setMounted]        = useState(false);
-
-  useEffect(() => { setMounted(true); }, []);
 
   // Auto-close drawer when viewport widens past md breakpoint
   useEffect(() => {
@@ -152,49 +197,32 @@ export function SiteNavbar() {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  // Only derive isLight after mount — both SSR and hydration pass use "dark"
-  const isLight = mounted && resolvedTheme === "light";
-
   return (
     <>
       {/* ── Fixed header ── */}
       <header
-        suppressHydrationWarning
-        className="fixed top-0 left-0 right-0 z-50 bg-[#060d1f]/90 backdrop-blur-md border-b border-blue-900/30"
+        className="fixed top-0 left-0 right-0 z-50 bg-[#fdf6e3]/90 dark:bg-[#060d1f]/90 backdrop-blur-md border-b border-transparent dark:border-blue-900/30"
       >
-        {/* ── Desktop top bar ── */}
-        <div className="hidden md:flex items-center justify-between px-8 py-3">
+        {/* ── Desktop: single row ── */}
+        <div className="hidden md:flex items-center px-8 py-3 relative">
           {/* Left: logo + theme toggle */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-shrink-0">
             <Link href="/" className="flex items-center gap-2">
               <Truck className="w-6 h-6 text-orange-400" />
-              <span
-                suppressHydrationWarning
-                className={`text-lg font-bold ${isLight ? "text-gray-900" : "text-white"}`}
-              >
+              <span className="text-lg font-bold text-gray-900 dark:text-white">
                 WESAuto<span className="text-orange-400">Transport</span>
               </span>
             </Link>
-            {/* ThemeToggle on LEFT so nav pill never covers it */}
             <ThemeToggle />
           </div>
 
-          {/* Right: actions */}
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setShowTrackModal(true)}
-              className="border-blue-700/60 text-blue-300 hover:bg-blue-900/40 hover:border-blue-500 text-sm gap-1.5"
-            >
-              <MapPin className="w-3.5 h-3.5 text-orange-400" />
-              Track Order
-            </Button>
-            <Link href="/get-quote">
-              <Button className="bg-orange-500 hover:bg-orange-600 text-white border-0 text-sm">
-                Get Free Quote →
-              </Button>
-            </Link>
+          {/* Center: nav pill — absolutely positioned so it's truly centered in the header */}
+          <div className="absolute left-1/2 -translate-x-1/2">
+            <DesktopNavPill onTrack={() => setShowTrackModal(true)} />
           </div>
+
+          {/* Right spacer — keeps logo from drifting */}
+          <div className="ml-auto" />
         </div>
 
         {/* ── Mobile top bar ── */}
@@ -236,13 +264,10 @@ export function SiteNavbar() {
           </div>
         </div>
 
-        {/* ── Desktop tubelight pill (inside header) ── */}
-        <div className="hidden md:block">
-          <NavBar items={navItems} />
-        </div>
-
-        {/* ── US location banner — inside fixed header so it’s never hidden behind it ── */}
+        {/* ── US location banner — inside fixed header so it's never hidden behind it ── */}
         <USLocationBanner />
+        {/* Bottom fade — CSS class avoids html.light gradient overrides that zero out Tailwind bg-gradient */}
+        <div aria-hidden="true" className="site-header-fade" />
       </header>
 
       {/* ── Mobile slide-down drawer ── */}
